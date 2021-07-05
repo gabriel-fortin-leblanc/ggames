@@ -1,10 +1,6 @@
-import networkx as nx
-import matplotlib.pyplot as plt
-import numpy as np
-
 import math
-import time
 import itertools
+import functools
 
 
 def get_attractor(V, A, V0, F0):
@@ -43,10 +39,10 @@ def get_attractor(V, A, V0, F0):
     for v in F0:
         propagate(v, w, p, n)
 
-    return [node for node, in_attractor in w.items() if in_attractor]
+    return set(node for node, in_attractor in w.items() if in_attractor)
 
 
-def get_game_graph(V, E, tau, k, T = None):
+def get_game_graph(V, E, tau, k, T=None):
     """
     Compute the game graph where the k-cops and robber game takes place on the
     edge periodic graph (V, E, tau) with a time horizon T.
@@ -59,11 +55,11 @@ def get_game_graph(V, E, tau, k, T = None):
     """
     if T is None:
         # Compute the least common multiple.
-        pattern_length = map(len, tau.values())
-        T = math.prod(pattern_length) // math.gcd(pattern_length)
+        pattern_length = list(map(len, tau.values()))
+        T = math.prod(pattern_length) // functools.reduce(math.gcd, pattern_length)
 
-    V_gg = [], A_gg = []
-    V0 = set(), F0 = set()
+    V_gg = []; A_gg = []
+    V0 = set(); F0 = set()
     capture_flag = False
 
     for *c, r in itertools.product(V, repeat=k+1):
@@ -82,7 +78,7 @@ def get_game_graph(V, E, tau, k, T = None):
         *c0, r0, s0, t0 = u
         *c1, r1, s1, t1 = v
         if t0 == t1 and not s0 and s1 and r0 == r1:
-            # Cop's move
+            # Cops' move
             valid_flag = True
             for i in range(len(c0)):
                 if c0[i] != c1[i] and \
@@ -104,33 +100,53 @@ def get_game_graph(V, E, tau, k, T = None):
     return V_gg, A_gg, V0, F0
 
 
-def get_winning_strategy(attractor):
-    strategies = []
-    for init_state in [(*crs, t) for *crs, t in attractor if t == 0]:
-        pass
+def get_next_moves(V, A, attractor, cops_move=True, others_move=None):
+    """
+    Return a list of all possible winning moves for a time-varying graph if 
+    """
+    if cops_move:
+        if others_move is None: # The initial cops' move.
+            return [(*crs, t) for *crs, t in attractor if t == 0]
+        
+        else:
+            possible_vertices = set([v for u, v in A if u == others_move])
+            return list(possible_vertices.intersection(attractor))
+
+    else:
+        possible_vertices = set([v for u, v in A if u == others_move])
+        return list(possible_vertices.difference(attractor))
+
+
+if __name__ == '__main__':
+
+    # Test of obvious cop-win graph
+    V_C3 = list(range(3))
+    E_C3 = [(i, (i+1)%3) for i in range(3)]
+    tau_C3 = {e: '1' for e in E_C3}
     
+    V_gg, A_gg, V0, F0 = get_game_graph(V_C3, E_C3, tau_C3, 1)
+    assert set(V_gg) == {(0, 0, False, 0), (0, 0, True, 0), (0, 1, False, 0),
+                         (0, 1, True, 0), (0, 2, False, 0), (0, 2, True, 0),
+                         (1, 0, False, 0), (1, 0, True, 0), (1, 1, False, 0),
+                         (1, 1, True, 0), (1, 2, False, 0), (1, 2, True, 0),
+                         (2, 0, False, 0), (2, 0, True, 0), (2, 1, False, 0),
+                         (2, 1, True, 0), (2, 2, False, 0), (2, 2, True, 0)}
+    """
+    assert set(A_gg) == {((0, 0, False, 0), (0, 0, True, 0)),
+                         ((0, 0, False, 0), (1, 0, True, 0)),
+                         ((0, 0, False, 0), (2, 0, True, 0)),
+                         ((0, 0, True, 0), (0, 0, False, 0)),
+                         ((0, 0, True, 0), (0, 1, False, 0)),
+                         ((0, 0, True, 0), (0, 2, False, 0)),
+                         ((0, 1, False, 0), (0, 1, True, 0)),
+                         ((0, 1, False, 0), (1, 1, True, 0)),
+                         ((0, 1, False, 0), (2, 1, True, 0)),
+                         ((1, 0, False, 0), (1, 0, True, 0)),
+                         ((1, 0, False, 0), (0, 0, True, 0)),
+                         ((1, 0, False, 0), (2, 0, True, 0)), # TODO : To continue...
+                         }
+    """
 
-T = 1
-# Generate vertices
-n_between = 2
-vertices = ['C1', 'C2', 'C']
-vertices.extend([f'L{i}' for i in range(1, n_between + 1)])
-vertices.extend([f'R{i}' for i in range(1, n_between + 1)])
-
-# Generate edges
-edges = [('C1', 'C'), ('C2', 'C'), (f'L{n_between}', 'C'), (f'R{n_between}', 'C')]
-edges.extend([('C1', f'L{i}') for i in range(1, n_between + 1)])
-edges.extend([('C2', f'R{i}') for i in range(1, n_between + 1)])
-edges.extend([(f'L{i}', f'L{i + 1}') for i in range(1, n_between)])
-edges.extend([(f'R{i}', f'R{i + 1}') for i in range(1, n_between)])
-
-G = nx.Graph()
-G.add_nodes_from(vertices)
-G.add_edges_from(edges)
-
-# Generate Tau
-tau = dict()
-for u, v in G.edges:
-    b = np.random.randint(2, size=T)
-    tau[(u, v)] = b
-    tau[(v, u)] = b
+    attractor = get_attractor(V_gg, A_gg, V0, F0)
+    assert attractor == set(V_gg)
+    
