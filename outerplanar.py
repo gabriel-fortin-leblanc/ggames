@@ -61,23 +61,6 @@ def get_game_graph(V, E, tau, k, T=None):
     return V_gg, A_gg, V0, F0
 
 
-def get_next_moves(V, A, attractor, cops_move=True, others_move=None):
-    """
-    Return a list of all possible winning moves for a time-varying graph if 
-    """
-    if cops_move:
-        if others_move is None: # The initial cops' move.
-            return [(*crs, t) for *crs, t in attractor if t == 0]
-        
-        else:
-            possible_vertices = set([v for u, v in A if u == others_move])
-            return list(possible_vertices.intersection(attractor))
-
-    else:
-        possible_vertices = set([v for u, v in A if u == others_move])
-        return list(possible_vertices.difference(attractor))
-
-
 if __name__ == '__main__':
 
     # Test of obvious cop-win graph
