@@ -69,6 +69,10 @@ if __name__ == '__main__':
     game = (G, F)
     attractor = get_attractor(game)
     assert set(attractor) == {2, 5}
+    next_moves_for_p0 = get_next_winning_moves(2, game, attractor)
+    assert set(next_moves_for_p0) == {5}
+    next_moves_for_p1 = get_next_winning_moves(4, game, attractor, False)
+    assert set(next_moves_for_p1) == {1}
 
     S0 = [1, 2, 3, 4, 8, 9]
     S1 = [5, 6, 7, 10]
@@ -79,4 +83,22 @@ if __name__ == '__main__':
     game = (G, F)
     attractor = get_attractor(game)
     assert set(attractor) == set(S0 + S1)
+    next_moves_for_p0 = get_next_winning_moves(3, game, attractor)
+    assert set(next_moves_for_p0) == {6, 7}
+    next_moves_for_p1 = get_next_winning_moves(6, game, attractor, False)
+    assert set(next_moves_for_p1) == set()
 
+    S0 = [1, 4]
+    S1 = [2, 3, 5]
+    A = [(1, 3), (1, 2), (2, 1), (2, 4), (3, 1), (3, 4), (4, 5)]
+    F = [5]
+    G = (S0, S1, A)
+    game = (G, F)
+    attractor = get_attractor(game)
+    assert set(attractor) == {4, 5}
+    next_moves_for_p0 = get_next_winning_moves(1, game, attractor)
+    assert set(next_moves_for_p0) == set()
+    next_moves_for_p0 = get_next_winning_moves(4, game, attractor)
+    assert set(next_moves_for_p0) == {5}
+    next_moves_for_p1 = get_next_winning_moves(2, game, attractor, False)
+    assert set(next_moves_for_p1) == {1}
