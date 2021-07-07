@@ -3,45 +3,6 @@ import itertools
 import functools
 
 
-def get_attractor(V, A, V0, F0):
-    """
-    Compute the attractor set.
-    Credit : Dietmar Berwanger in "Graph games with perfect information"
-    :param V: The set of vertices
-    :param E: The set of edges
-    :param V0: The set of initial vertices
-    :param F0: The set of goal vertices
-    :return: The attractor set of the graph
-    """
-
-    def propagate(v, W, P, N):
-        if W[v]: return
-
-        W[v] = True
-        for u in P[v]:
-            n[u] -= 1
-            if u in V0 or N[u] == 0:
-                propagate(u, W, P, N)
-
-    w = {}
-    p = {}
-    n = {}
-
-    for v in V:
-        w[v] = False
-        p[v] = set()
-        n[v] = 0
-
-    for u, v in A:
-        p[v].add(u)
-        n[u] += 1
-
-    for v in F0:
-        propagate(v, w, p, n)
-
-    return set(node for node, in_attractor in w.items() if in_attractor)
-
-
 def get_game_graph(V, E, tau, k, T=None):
     """
     Compute the game graph where the k-cops and robber game takes place on the
