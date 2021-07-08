@@ -1,6 +1,7 @@
 import math
 import functools
 import itertools
+import copy
 
 
 def get_game_graph(V, E, k=1, tau=None, time_horizon=None):
@@ -17,6 +18,7 @@ def get_game_graph(V, E, k=1, tau=None, time_horizon=None):
     :param time_horizon: The time horizon which is the least common multiple
                          of the values of tau.
     """
+    # TODO: Have to be rewrite for the readability.
     # TODO: May remove the following lines by adding conditions
     if tau is None:
         tau = {e: '1' for e in E}
@@ -63,13 +65,37 @@ def get_game_graph(V, E, k=1, tau=None, time_horizon=None):
             if valid_flag:
                 A_gg.append((u, v))
         
-        elif (t0 + 1)%time_horizon == t1 and s0 and not s1 and c0 == c1 and r1 not in c1:
+        elif (t0 + 1)%time_horizon == t1 and s0 and not s1 and c0 == c1 and \
+                r1 not in c1:
             # Robber's move
             if r0 == r1 or (r0 != r1 and \
                     adjancy[vertex_index[r0]][vertex_index[r1]] \
-                    [t0%len(adjancy[vertex_index[r0]][vertex_index[r1]])] == '1'):
+                    [t0%len(adjancy[vertex_index[r0]][vertex_index[r1]])] \
+                        == '1'):
                 A_gg.append((u, v))
     return V_gg, A_gg
+
+
+def game_graph_to_reachable_game(V_gg, A_gg):
+    """
+    Compute and return a reachable game corresponding to the game graph
+    G = (V_gg, A_gg).
+    :param V_gg: A list of vertices of a game graph
+    :param A_gg: A list of edges of a game graph
+    """
+    S0 = []; S1 = []
+    A = copy.deepcopy(A_gg)
+    F = []
+    for v in V_gg:
+        *c, r, s, t = v
+        if r in c:
+            F.append(v)
+        if s:
+            S1.append(v)
+        else:
+            S0.append(v)
+    G = (S0, S1, A)
+    return G, F
 
 
 if __name__ == '__main__':
@@ -116,6 +142,23 @@ if __name__ == '__main__':
                          ((3, 2, False, 0), (3, 2, True, 0)),
                          ((3, 2, True, 0), (3, 1, False, 0)),
                          ((3, 2, True, 0), (3, 2, False, 0))}
+    G, F = game_graph_to_reachable_game(V_gg, A_gg)
+    S0, S1, A = G
+    assert set(S0) == {(1, 1, False, 0), (1, 2, False, 0),
+                       (1, 3, False, 0), (2, 1, False, 0),
+                       (2, 2, False, 0), (2, 3, False, 0),
+                       (3, 1, False, 0), (3, 2, False, 0),
+                       (3, 3, False, 0)}
+    assert set(S1) == {(1, 1, True, 0), (1, 2, True, 0),
+                       (1, 3, True, 0), (2, 1, True, 0),
+                       (2, 2, True, 0), (2, 3, True, 0),
+                       (3, 1, True, 0), (3, 2, True, 0),
+                       (3, 3, True, 0)}
+    assert set(F) == {(1, 1, False, 0), (1, 1, True, 0),
+                      (2, 2, False, 0), (2, 2, True, 0),
+                      (3, 3, False, 0), (3, 3, True, 0)}
+    assert set(A) == set(A_gg)
+
 
     # K_2
     V = [1, 2]
@@ -139,6 +182,24 @@ if __name__ == '__main__':
                          ((2, 2, 1, False, 0), (2, 1, 1, True, 0)),
                          ((2, 2, 1, False, 0), (2, 2, 1, True, 0)),
                          ((2, 2, 1, True, 0), (2, 2, 1, False, 0))}
+    G, F = game_graph_to_reachable_game(V_gg, A_gg)
+    S0, S1, A = G
+    assert set(S0) == {(1, 1, 1, False, 0), (1, 1, 2, False, 0),
+                       (1, 2, 1, False, 0), (1, 2, 2, False, 0),
+                       (2, 1, 1, False, 0), (2, 1, 2, False, 0),
+                       (2, 2, 1, False, 0), (2, 2, 2, False, 0)}
+    assert set(S1) == {(1, 1, 1, True, 0), (1, 1, 2, True, 0),
+                       (1, 2, 1, True, 0), (1, 2, 2, True, 0),
+                       (2, 1, 1, True, 0), (2, 1, 2, True, 0),
+                       (2, 2, 1, True, 0), (2, 2, 2, True, 0)}
+    assert set(F) == {(1, 1, 1, False, 0), (1, 1, 1, True, 0),
+                      (1, 2, 1, False, 0), (1, 2, 1, True, 0),
+                      (1, 2, 2, False, 0), (1, 2, 2, True, 0),
+                      (2, 1, 1, False, 0), (2, 1, 1, True, 0),
+                      (2, 1, 2, False, 0), (2, 1, 2, True, 0),
+                      (2, 2, 2, False, 0), (2, 2, 2, True, 0)}
+    assert set(A) == set(A_gg)
+
     
     # P_2
     V = [1, 2, 3]
@@ -205,3 +266,30 @@ if __name__ == '__main__':
                          ((3, 2, False, 1), (3, 2, True, 1)),
                          ((3, 2, True, 1), (3, 1, False, 0)),
                          ((3, 2, True, 1), (3, 2, False, 0))}
+    G, F = game_graph_to_reachable_game(V_gg, A_gg)
+    S0, S1, A = G
+    assert set(S0) == {(1, 1, False, 0), (1, 2, False, 0),
+                       (1, 3, False, 0), (2, 1, False, 0),
+                       (2, 2, False, 0), (2, 3, False, 0),
+                       (3, 1, False, 0), (3, 2, False, 0),
+                       (3, 3, False, 0), (1, 1, False, 1),
+                       (1, 2, False, 1), (1, 3, False, 1),
+                       (2, 1, False, 1), (2, 2, False, 1),
+                       (2, 3, False, 1), (3, 1, False, 1),
+                       (3, 2, False, 1), (3, 3, False, 1)}
+    assert set(S1) == {(1, 1, True, 0), (1, 2, True, 0),
+                       (1, 3, True, 0), (2, 1, True, 0),
+                       (2, 2, True, 0), (2, 3, True, 0),
+                       (3, 1, True, 0), (3, 2, True, 0),
+                       (3, 3, True, 0), (1, 1, True, 1),
+                       (1, 2, True, 1), (1, 3, True, 1),
+                       (2, 1, True, 1), (2, 2, True, 1),
+                       (2, 3, True, 1), (3, 1, True, 1),
+                       (3, 2, True, 1), (3, 3, True, 1)}
+    assert set(F) == {(1, 1, False, 0), (1, 1, True, 0),
+                      (2, 2, False, 0), (2, 2, True, 0),
+                      (3, 3, False, 0), (3, 3, True, 0),
+                      (1, 1, False, 1), (1, 1, True, 1),
+                      (2, 2, False, 1), (2, 2, True, 1),
+                      (3, 3, False, 1), (3, 3, True, 1)}
+    assert set(A) == set(A_gg)
