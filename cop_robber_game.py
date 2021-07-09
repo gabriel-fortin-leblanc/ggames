@@ -4,19 +4,15 @@ import itertools
 import copy
 
 
-def get_game_graph(V, E, k=1, tau=None, time_horizon=None):
+def get_game_graph(V, E, k=1, tau=None):
     """
     Compute the game graph where the k-cops and robber game takes place on the
     edge periodic graph (V, E, tau) with a time horizon "time_horizon". If
-    "tau" is not specified, then the graph is considered to be static. If only
-    "time_horizon" is not specified, then the least common multiple is computed
-    to replace it.
+    "tau" is not specified, then the graph is considered to be static.
     :param V: The list of vertices
     :param E: The list of edges
-    :param tau: The presence function of the edges in E in dict
     :param k: The number of cops in the game
-    :param time_horizon: The time horizon which is the least common multiple
-                         of the values of tau.
+    :param tau: The presence function of the edges in E in dict
     """
     # TODO: Have to be rewrite for the readability.
     # TODO: May remove the following lines by adding conditions
@@ -28,14 +24,13 @@ def get_game_graph(V, E, k=1, tau=None, time_horizon=None):
                     tau[(v, u)] if (v, u) in tau else
                     '0' for u in V] for v in V]
     
-    if time_horizon is None:
-        # Compute the least common multiple.
-        if len(tau) == 0:
-            time_horizon = 1
-        else:
-            pattern_length = list(map(len, tau.values()))
-            time_horizon = (math.prod(pattern_length) //
-                    functools.reduce(math.gcd, pattern_length))
+    # Compute the least common multiple.
+    if len(tau) == 0:
+        time_horizon = 1
+    else:
+        pattern_length = list(map(len, tau.values()))
+        time_horizon = (math.prod(pattern_length) // 
+            functools.reduce(math.gcd, pattern_length))
 
     # Compute the set of vertices of the game graph.
     V_gg = [(*c, r, s, t)

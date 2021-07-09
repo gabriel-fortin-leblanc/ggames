@@ -1,41 +1,27 @@
-from os import stat
-from outerplanar import get_game_graph, get_attractor
-import networkx as nx
-import random as rand
-import matplotlib.pyplot as plt
+import queue
+import computer
 import itertools
+from multiprocessing import Process, Lock, Queue
 
 
-def show(V, E):
-    G = nx.Graph()
-    G.add_nodes_from(V)
-    G.add_edges_from(E)
-    nx.draw(G)
-    plt.show()
+def produce(V, E, k, sequence_length, queue, lock):
+    for tvg in computer.generate_periodic_edge_graph((V, E), sequence_length):
+        queue.put((tvg, k))
+    with lock:
+        print('Problems produced')
+
+def consume(queue, lock):
+    pass
 
 
-# Create an outerplanar graph
-V = list(range(8))
-E = [(i, (i+1)%8) for i in range(8)]
-E.extend([(0, 6), (1, 6), (1, 5), (2, 5), (2, 4)])
+if __name__ == '__main__':
+    V = []; E =[]
+    k = 2; sequence_length = 10
+    problem_queue = Queue()
+    print_lock = Lock()
+    
+    producer = Process(target=produce,
+            args=(V, E, k, sequence_length, queue, print_lock))
+    producer.start()
 
-tau = {(i, (i+1)%8): '1' for i in range(8)}
-tau[(0, 6)] = '01'
-tau[(1, 5)] = '01'
-tau[(2, 4)] = '01'
-tau[(1, 6)] = '10'
-tau[(2, 5)] = '10'
-
-V_gg, A_gg, V0, F0 = get_game_graph(V, E, tau, 1, 2)
-attractor = get_attractor(V_gg, A_gg, V0, F0)
-robber_winning_state = set(V0) - attractor
-
-game_graph = nx.DiGraph()
-game_graph.add_nodes_from(V_gg)
-game_graph.add_edges_from(A_gg)
-
-pos = nx.spring_layout(game_graph)
-nx.draw(game_graph, pos)
-nx.draw_networkx_nodes(game_graph, pos, robber_winning_state, node_color='r')
-
-plt.show()
+    
