@@ -1,4 +1,5 @@
 import itertools
+import functools
 from reachable_game import get_attractor
 from cop_robber_game import get_game_graph, game_graph_to_reachable_game
 
@@ -39,10 +40,19 @@ def is_kcop_win(V, E, tau, k=1):
     """
     game = game_graph_to_reachable_game(*get_game_graph(V, E, k, tau))
     attractor = get_attractor(game)
-    G, F = game
-    S0, S1, A = G
-    initial_states = [(*crs, t) for *crs, t in S0 if t == 0]
-    return len(set(initial_states).intersection(attractor)) > 0
+
+    n = len(V)
+    starting_classes = dict()
+    for *c, r, s, t in attractor:
+        c = tuple(c)
+        if t == 0 and not s:
+            if c not in starting_classes:
+                starting_classes[c] = set()
+            starting_classes[c].add(r)
+    for cls in starting_classes.values():
+        if len(cls) == n:
+            return True
+    return False
 
 def resolve_problem(EPCR, on_succeed=None, on_failure=None):
     if is_kcop_win(*EPCR):
@@ -69,4 +79,24 @@ if __name__ == '__main__':
                                   {1: '11', 2: '01'}, {1: '11', 2: '10'},
                                   {1: '11', 2: '11'}]
     
-    # TODO: Tests is_kcop_win.
+    # K_3
+    V = [1, 2, 3]
+    E = [(1, 2), (2, 3), (1, 3)]
+    tau = {e: '1' for e in E}
+    assert is_kcop_win(V, E, tau)
+    assert is_kcop_win(V, E, tau, 2)
+
+    # K_4
+    V = [1, 2, 3, 4]
+    E = [(1, 2), (2, 3), (3, 4), (4, 1)]
+    tau = {e: '1' for e in E}
+    assert not is_kcop_win(V, E, tau)
+    assert is_kcop_win(V, E, tau, 2)
+
+    # K_12
+    n = 12
+    V = list(range(n))
+    E = [(i, (i+1)%n) for i in range(n)]
+    tau = {(i, (i+1)%n): '1' for i in range(n-2)}
+    tau.update({(i, (i+1)%n): '0001' for i in range(n-2, n)})
+    assert is_kcop_win(V, E, tau)
