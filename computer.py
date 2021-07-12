@@ -54,12 +54,6 @@ def is_kcop_win(V, E, tau, k=1):
             return True
     return False
 
-def resolve_problem(EPCR, on_succeed=None, on_failure=None):
-    if is_kcop_win(*EPCR):
-        if on_succeed is not None: on_succeed(EPCR)
-    else:
-        if on_failure is not None: on_failure(EPCR)
-
 
 if __name__ == '__main__':
     sequences = list(get_bit_sequences(1))
