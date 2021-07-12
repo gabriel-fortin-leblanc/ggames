@@ -1,3 +1,9 @@
+"""
+A cops and robber game is played on a edge periodic (or static) graph
+(V, E, tau) where tau is the presence mapping of the edges.
+"""
+
+
 import math
 import functools
 import itertools
@@ -5,20 +11,18 @@ import copy
 from reachable_game import get_attractor
 
 
-def get_game_graph(V, E, k=1, tau=None):
+def get_game_graph(V, E, tau=None, k=1):
     """
-    Compute the game graph where the k-cops and robber game takes place on the
+    Compute the game graph where the k-cops and robber game take place on the
     edge periodic graph (V, E, tau) with a time horizon "time_horizon". If
     "tau" is not specified, then the graph is considered to be static.
     :param V: The list of vertices
     :param E: The list of edges
-    :param k: The number of cops in the game
     :param tau: The presence function of the edges in E in dict
+    :param k: The number of cops in the game
     """
-    # TODO: Have to be rewrite for the readability.
-    # TODO: May remove the following lines by adding conditions
-    if tau is None:
-        tau = {e: '1' for e in E}
+    if tau is None: tau = {e: '1' for e in E}
+
     # Compute an adjancy matrix to simplify the algorithm.
     vertex_index = {u: index for index, u in enumerate(V)}
     adjancy = [[tau[(u, v)] if (u, v) in tau else
@@ -29,9 +33,9 @@ def get_game_graph(V, E, k=1, tau=None):
     if len(tau) == 0:
         time_horizon = 1
     else:
-        pattern_length = list(map(len, tau.values()))
-        time_horizon = (math.prod(pattern_length) // 
-            functools.reduce(math.gcd, pattern_length))
+        pattern_lengths = list(map(len, tau.values()))
+        time_horizon = (math.prod(pattern_lengths) // 
+            functools.reduce(math.gcd, pattern_lengths))
 
     # Compute the set of vertices of the game graph.
     V_gg = [(*c, r, s, t)
@@ -90,8 +94,8 @@ def game_graph_to_reachable_game(V_gg, A_gg):
             S1.append(v)
         else:
             S0.append(v)
-    G = (S0, S1, A)
-    return G, F
+    return S0, S1, A, F
+
 
 def is_kcop_win(V, E, tau, k=1):
     """
@@ -101,8 +105,9 @@ def is_kcop_win(V, E, tau, k=1):
     :param tau: A map from E to a set of bit sequences
     :param k: The number of cops that play on the time-varying graph
     """
-    game = game_graph_to_reachable_game(*get_game_graph(V, E, k, tau))
-    attractor = get_attractor(game)
+    attractor = get_attractor(
+                            *game_graph_to_reachable_game(
+                            *get_game_graph(V, E, tau, k)))
 
     n = len(V)
     starting_classes = dict()
@@ -162,8 +167,7 @@ if __name__ == '__main__':
                          ((3, 2, False, 0), (3, 2, True, 0)),
                          ((3, 2, True, 0), (3, 1, False, 0)),
                          ((3, 2, True, 0), (3, 2, False, 0))}
-    G, F = game_graph_to_reachable_game(V_gg, A_gg)
-    S0, S1, A = G
+    S0, S1, A, F = game_graph_to_reachable_game(V_gg, A_gg)
     assert set(S0) == {(1, 1, False, 0), (1, 2, False, 0),
                        (1, 3, False, 0), (2, 1, False, 0),
                        (2, 2, False, 0), (2, 3, False, 0),
@@ -202,8 +206,7 @@ if __name__ == '__main__':
                          ((2, 2, 1, False, 0), (2, 1, 1, True, 0)),
                          ((2, 2, 1, False, 0), (2, 2, 1, True, 0)),
                          ((2, 2, 1, True, 0), (2, 2, 1, False, 0))}
-    G, F = game_graph_to_reachable_game(V_gg, A_gg)
-    S0, S1, A = G
+    S0, S1, A, F = game_graph_to_reachable_game(V_gg, A_gg)
     assert set(S0) == {(1, 1, 1, False, 0), (1, 1, 2, False, 0),
                        (1, 2, 1, False, 0), (1, 2, 2, False, 0),
                        (2, 1, 1, False, 0), (2, 1, 2, False, 0),
@@ -225,7 +228,7 @@ if __name__ == '__main__':
     V = [1, 2, 3]
     E = [(1, 2), (2, 3)]
     tau = {(1, 2): '1', (2, 3): '01'}
-    V_gg, A_gg = get_game_graph(V, E, tau=tau)
+    V_gg, A_gg = get_game_graph(V, E, tau)
     assert set(V_gg) == {(1, 1, False, 0), (1, 1, True, 0),
                          (1, 2, False, 0), (1, 2, True, 0),
                          (1, 3, False, 0), (1, 3, True, 0),
@@ -286,8 +289,7 @@ if __name__ == '__main__':
                          ((3, 2, False, 1), (3, 2, True, 1)),
                          ((3, 2, True, 1), (3, 1, False, 0)),
                          ((3, 2, True, 1), (3, 2, False, 0))}
-    G, F = game_graph_to_reachable_game(V_gg, A_gg)
-    S0, S1, A = G
+    S0, S1, A, F = game_graph_to_reachable_game(V_gg, A_gg)
     assert set(S0) == {(1, 1, False, 0), (1, 2, False, 0),
                        (1, 3, False, 0), (2, 1, False, 0),
                        (2, 2, False, 0), (2, 3, False, 0),

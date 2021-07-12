@@ -21,7 +21,8 @@ def get_attractor(S0, S1, A, F):
         for prev in previous[vertex]:
             num_out_degree[prev] -= 1
             if prev in S0_set or num_out_degree[prev] == 0:
-                propagate(prev, in_attractor, num_out_degree, previous, S0_set)
+                propagate(prev, in_attractor, num_out_degree, previous,
+                    S0_set)
 
     in_attractor = dict()
     previous = dict()
@@ -59,7 +60,8 @@ def get_next_winning_moves(current_vertex, A, attractor, player0_move=True):
     if player0_move:
         return [v for u, v in A if u == current_vertex and v in attractor_set]
     else:
-        return [v for u, v in A if u == current_vertex and v not in attractor_set]
+        return [v for u, v in A if u == current_vertex and
+            v not in attractor_set]
 
 
 if __name__ == '__main__':
