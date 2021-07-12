@@ -10,6 +10,7 @@ def generate_periodic_edge_graph(footprint, sequence_length):
     where the least common multiple of all sequence length is a divider of
     "sequence_length" are yielded by this function. The footprint is a tuple
     of two lists, a list of vertices and a list of edges.
+    TODO: Change the comment template.
     """
     V, E = footprint
     sequences = [str(seq).replace('0b', '').rjust(sequence_length, '0')
@@ -20,6 +21,7 @@ def generate_periodic_edge_graph(footprint, sequence_length):
 
 
 def is_kcop_win(tvg, k=1):
+    # TODO: Add comments.
     V, E, tau = tvg
     game = game_graph_to_reachable_game(*get_game_graph(V, E, k, tau))
     attractor = get_attractor(game)
@@ -29,7 +31,13 @@ def is_kcop_win(tvg, k=1):
     return len(set(initial_state).intersection(attractor)) > 0
 
 def resolve_problem(EPCR, on_succeed=None, on_failure=None):
+    # TODO: Add comments.
     if is_kcop_win(*EPCR):
         if on_succeed is not None: on_succeed(EPCR)
     else:
         if on_failure is not None: on_failure(EPCR)
+
+
+if __name__ == '__main__':
+    # TODO: Must implement tests.
+    pass
