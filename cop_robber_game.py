@@ -2,6 +2,7 @@ import math
 import functools
 import itertools
 import copy
+from reachable_game import get_attractor
 
 
 def get_game_graph(V, E, k=1, tau=None):
@@ -91,6 +92,30 @@ def game_graph_to_reachable_game(V_gg, A_gg):
             S0.append(v)
     G = (S0, S1, A)
     return G, F
+
+def is_kcop_win(V, E, tau, k=1):
+    """
+    Compute if the time-varying graph ("V", "E", "tau") is "k"-cop win.
+    :param V: A set of vertices
+    :param E: A set of edges
+    :param tau: A map from E to a set of bit sequences
+    :param k: The number of cops that play on the time-varying graph
+    """
+    game = game_graph_to_reachable_game(*get_game_graph(V, E, k, tau))
+    attractor = get_attractor(game)
+
+    n = len(V)
+    starting_classes = dict()
+    for *c, r, s, t in attractor:
+        c = tuple(c)
+        if t == 0 and not s:
+            if c not in starting_classes:
+                starting_classes[c] = set()
+            starting_classes[c].add(r)
+    for cls in starting_classes.values():
+        if len(cls) == n:
+            return True
+    return False
 
 
 if __name__ == '__main__':
@@ -288,3 +313,25 @@ if __name__ == '__main__':
                       (2, 2, False, 1), (2, 2, True, 1),
                       (3, 3, False, 1), (3, 3, True, 1)}
     assert set(A) == set(A_gg)
+
+    # K_3
+    V = [1, 2, 3]
+    E = [(1, 2), (2, 3), (1, 3)]
+    tau = {e: '1' for e in E}
+    assert is_kcop_win(V, E, tau)
+    assert is_kcop_win(V, E, tau, 2)
+
+    # K_4
+    V = [1, 2, 3, 4]
+    E = [(1, 2), (2, 3), (3, 4), (4, 1)]
+    tau = {e: '1' for e in E}
+    assert not is_kcop_win(V, E, tau)
+    assert is_kcop_win(V, E, tau, 2)
+
+    # K_12
+    n = 12
+    V = list(range(n))
+    E = [(i, (i+1)%n) for i in range(n)]
+    tau = {(i, (i+1)%n): '1' for i in range(n-2)}
+    tau.update({(i, (i+1)%n): '0001' for i in range(n-2, n)})
+    assert is_kcop_win(V, E, tau)
