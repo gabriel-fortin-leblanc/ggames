@@ -1,7 +1,4 @@
 import itertools
-import functools
-from reachable_game import get_attractor
-from cop_robber_game import get_game_graph, game_graph_to_reachable_game
 
 
 def get_bit_sequences(length, zero_sequence_included=True):
