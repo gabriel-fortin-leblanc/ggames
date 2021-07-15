@@ -3,41 +3,56 @@ import utils
 import cop_robber_game as crg
 
 import sys, os, time, re
+from queue import Empty, Full
 import multiprocessing as mp
 
 
-def produce(V, E, sequence_length, k, queue, printing_lock):
+def produce(V, E, sequence_length, k, problem_queue):
     """
     Initialize every "k"-cops and robber problem on edge periodic graph with a
     footprint ("V", "E") and edge pattern lengths of "sequence_length", and
-    add them to the "queue". The "printing_lock" is used for printing logs.
+    add them to the "problem_queue".
     :param V: A list of vertices
     :param E: A list of edges
     :param sequence_length: The length of the edge patterns
     :param k: The number of cops that take place in the game
-    :param queue: A thread-safe queue
-    :param printing_lock: A lock for use the standard output
+    :param problem_queue: A thread-safe queue
     """
     for presence_map in utils.generate_edge_presence_maps(E, sequence_length):
-        queue.put((V, E, presence_map, k))
-    with printing_lock:
-        print(f'{(2**sequence_length-1)**len(E)} problems produced')
+        problem_queue.put((V, E, presence_map, k))
+    print(f'{(2**sequence_length-1)**len(E)} problems produced')
 
-def consume(queue, printing_lock, output_file):
+def problem_consume(problem_queue, output_queue):
     """
-    Take a problem from the "queue" and decide if it's k-cop-win. If it is,
-    then the it writes the presence_map in the "output_file" using the
-    "printing_lock".
-    :param queue: A thread-safe queue containing the problems
-    :param printing_lock: A lock for use the standard output and an output
-                          file
-    :param output_file: The file to write the presence maps.
+    Take a problem from the "problem_queue" and decide if it's k-cop-win. If
+    it is, then the it adds the presence_map in the "output_queue" in string.
+    :param problem_queue: A thread-safe queue containing the problems
+    :param output_queue: A queue to add the presence maps.
     """
-    V, E, tau, k = queue.get()
-    if crg.is_kcop_win(V, E, tau, k):
-        with printing_lock:
+    try:
+        problem = problem_queue.get(timeout=3)
+        if problem is None: return
+        V, E, tau, k = problem
+        if crg.is_kcop_win(V, E, tau, k):
+            output_queue.put(f'{tau}\n')
+        problem_queue.task_done()
+    except Empty: pass
+
+
+def output_consume(output_queue, output_file):
+    """
+    It writes every string in "output_queue" in the "output_file".
+    :param output_queue: A queue containing strings
+    :param output_file: A writable file
+    """
+    while True:
+        try:
+            out = output_queue.get(timeout=3)
             print(f'A {k}-cop-winning graph has been found!')
-            output_file.write(f'{tau}\n')
+            output_file.write(out)
+            output_file.flush()
+            output_queue.task_done()
+        except Empty: pass
 
 
 def str_time_since(start):
@@ -55,10 +70,11 @@ def str_time_since(start):
     minutes = delta_time // MINUTES_TO_NANOSECONDS
     delta_time -= minutes * MINUTES_TO_NANOSECONDS
     seconds = delta_time // SECONDS_TO_NANOSECONDS
-    return f'HH:MM:SS = {hours}:{minutes}:{seconds}'
+    return f'HH:MM:SS = {int(hours)}:{int(minutes)}:{int(seconds)}'
 
 
 if __name__ == '__main__':
+    # TODO: Change the file format to JSON.
     ERROR_ARGS_MSG = \
 '''Two file names must specified as argument. The first
 one is a file containing an integer greater than 0 on the first
@@ -73,11 +89,11 @@ file doesn't exist, then it will be created. It contains every
 presence mapping of k-cop-winning graph, one per line.
 *** Don't forget to check the permissions of the files. ***'''
 
-    MAX_SIZE_PROBLEMS_QUEUE = 1000
+    MAX_SIZE_PROBLEMS_QUEUE = int(1e4)
+    MAX_RESOLVER_PROCESSES = None # The pool will use all CPU available.
 
     
     print('Analyzing the arguments...')
-    start_time = time.time_ns()
     args = sys.argv
     if len(args) != 3 or not os.access(args[1], os.R_OK):
         exit(ERROR_ARGS_MSG)
@@ -103,26 +119,42 @@ presence mapping of k-cop-winning graph, one per line.
     except:
         exit(ERROR_ARGS_MSG)
     V = list(V)
-    print(f'Analizing completed in {str_time_since(start_time)}')
     
-    print('Initialization of the producer and the consumers...')
-    start_time = time.time_ns()
-    queue = mp.Queue(MAX_SIZE_PROBLEMS_QUEUE)
-    lock = mp.Lock()
-    file = open(args[2], 'w')
-    producer = mp.Process(target=produce, args=(V, E, length, k, queue, lock))
-    consumers_pool = mp.Pool(initializer=consume,
-            initargs=(queue, lock, file))
-    print(f'Initialization completed in {str_time_since(start_time)}')
+    print('Initialization of the producer, the resolver and '\
+        'the writer processes...')
+    problem_queue = mp.JoinableQueue(MAX_SIZE_PROBLEMS_QUEUE)
+    output_queue = mp.JoinableQueue()
+    output_file = open(args[2], 'w')
+
+    producer_process = mp.Process(target=produce,
+            args=(V, E, length, k, problem_queue))
+    consumers_pool = mp.Pool(processes=MAX_RESOLVER_PROCESSES,
+            initializer=problem_consume,
+            initargs=(problem_queue, output_queue))
+    output_process = mp.Process(target=output_consume,
+            args=(output_queue, output_file))
     
     print('Computing...')
     start_time = time.time_ns()
-    producer.start()
-    producer.join()
-    while not queue.empty():
-        time.sleep(5)
-    queue.close()
-    queue.join_thread()
+    
+    output_process.start()
+    # Writer process is ready to write k-cops-winnning graph.
+    producer_process.start()
+    # Producer process has starting to add problems to the queue.
+    
+    problem_queue.join()
+    # All problems has been removed from the queue.
     consumers_pool.close()
     consumers_pool.join()
+    # All problems has been resolved.
+
+    output_queue.join()
+    # All k-cops-winning graph has been written.
+
+    # "Close" zombie processes.
+    producer_process.join()
+    output_process.terminate() # TODO: Must find another way...
+
+    # Flush the buffer and close the file.
+    output_file.close()
     print(f'Computing completed in {str_time_since(start_time)}')
