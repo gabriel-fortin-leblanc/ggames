@@ -8,7 +8,13 @@ import math
 import functools
 import itertools
 import copy
+import multiprocessing as mp
+from queue import Empty, Full
 from reachable_game import get_attractor
+
+
+MAX_POOL_PROCESSES = None
+MAX_QUEUE_SIZE = 1000
 
 
 def get_game_graph(V, E, tau=None, k=1):
@@ -44,35 +50,47 @@ def get_game_graph(V, E, tau=None, k=1):
                 for *c, r in itertools.product(V, repeat=k+1)]
     
     # Compute the set of arcs of the game graph.
-    A_gg = []
-    for u, v in itertools.product(V_gg, repeat=2):
-        *c0, r0, s0, t0 = u
-        *c1, r1, s1, t1 = v
-        if r0 in c0: continue
+    def add_to_arcs(A_gg, queue):
+        try:
+            u, v = queue.get(timeout=3)
+            *c0, r0, s0, t0 = u
+            *c1, r1, s1, t1 = v
+            if r0 in c0: return
 
-        if t0 == t1 and not s0 and s1 and r0 == r1:
-            # Cops' move
-            valid_flag = True
-            for i in range(len(c0)):
-                if c0[i] != c1[i] and \
-                        adjancy[vertex_index[c0[i]]][vertex_index[c1[i]]] \
-                        [t0%len(adjancy[vertex_index[c0[i]]]
-                            [vertex_index[c1[i]]])] == '0':
-                    # It is impossible for a cops to move in
-                    # one rounds to a non adjacent vertex.
-                    valid_flag = False
-                    break
-            if valid_flag:
-                A_gg.append((u, v))
-        
-        elif (t0 + 1)%time_horizon == t1 and s0 and not s1 and c0 == c1 and \
-                r1 not in c1:
-            # Robber's move
-            if r0 == r1 or (r0 != r1 and \
-                    adjancy[vertex_index[r0]][vertex_index[r1]] \
-                    [t0%len(adjancy[vertex_index[r0]][vertex_index[r1]])] \
-                        == '1'):
-                A_gg.append((u, v))
+            if t0 == t1 and not s0 and s1 and r0 == r1:
+                # Cops' move
+                valid_flag = True
+                for i in range(len(c0)):
+                    if c0[i] != c1[i] and \
+                            adjancy[vertex_index[c0[i]]][vertex_index[c1[i]]] \
+                            [t0%len(adjancy[vertex_index[c0[i]]]
+                                [vertex_index[c1[i]]])] == '0':
+                        # It is impossible for a cops to move in
+                        # one rounds to a non adjacent vertex.
+                        valid_flag = False
+                        break
+                if valid_flag:
+                    A_gg.append((u, v))
+            
+            elif (t0 + 1)%time_horizon == t1 and s0 and not s1 and c0 == c1 and \
+                    r1 not in c1:
+                # Robber's move
+                if r0 == r1 or (r0 != r1 and \
+                        adjancy[vertex_index[r0]][vertex_index[r1]] \
+                        [t0%len(adjancy[vertex_index[r0]][vertex_index[r1]])] \
+                            == '1'):
+                    A_gg.append((u, v))
+        except Empty: pass
+
+    A_gg = []
+    queue = mp.JoinableQueue(maxsize=MAX_QUEUE_SIZE)
+    pool = mp.Pool(processes=MAX_POOL_PROCESSES, initializer=add_to_arcs,
+            initargs=(A_gg, queue))
+    for a in itertools.product(V_gg, repeat=2): queue.put(a)
+    queue.join()
+    pool.close()
+    pool.join()
+
     return V_gg, A_gg
 
 
