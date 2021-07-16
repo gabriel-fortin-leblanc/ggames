@@ -34,8 +34,8 @@ def get_game_graph(V, E, tau=None, k=1):
         time_horizon = 1
     else:
         pattern_lengths = list(map(len, tau.values()))
-        time_horizon = (math.prod(pattern_lengths) // 
-            functools.reduce(math.gcd, pattern_lengths))
+        time_horizon = functools.reduce(lambda x,y: abs(x*y) // math.gcd(x,y),
+                pattern_lengths)
 
     # Compute the set of vertices of the game graph.
     V_gg = [(*c, r, s, t)
