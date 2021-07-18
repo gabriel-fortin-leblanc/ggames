@@ -1,11 +1,34 @@
-from multiprocessing import pool
 import utils
 import cop_robber_game as crg
 
-import sys, os, time, re
+import sys, os, time, re, json, argparse
 from queue import Empty, Full
 import multiprocessing as mp
 
+
+PROGRAM_NAME = 'Cop-number computer'
+PROGRAM_DESCRIPTION = \
+'''This program takes cop-number problem and decide if it is a k-cop-winning
+graph. The graph can be either staic or edge periodic one. It proceeds by
+reducing the problem to a reachability game.'''
+
+ERROR_ARGS_MSG = \
+'''Two file names must specified as argument. The first
+one is a file containing an integer greater than 0 on the first
+line that represents the number of cops, an integer greater than 0
+that represents the length of the edge patterns on the second line
+and a list of adjancy vertices on the third line in the following
+format:\n
+\t(1,2), (2,3), (1,3)\n
+This is a list of couples of vertices.\n
+The second file will contain the output of the program. If the
+file doesn't exist, then it will be created. It contains every
+presence mapping of k-cop-winning graph, one per line.
+*** Don't forget to check the permissions of the files. ***'''
+
+
+MAX_SIZE_PROBLEMS_QUEUE = 1000
+MAX_RESOLVER_PROCESSES = 3 # None := Every CPU is going to be used.
 
 def produce(V, E, sequence_length, k, problem_queue):
     """
@@ -55,6 +78,39 @@ def output_consume(output_queue, output_file):
         except Empty: pass
 
 
+def create_parser():
+    """
+    Create the arguments parser of the program.
+    """
+    parser = argparse.ArgumentParser(
+            prog=PROGRAM_NAME,
+            description=PROGRAM_DESCRIPTION)
+    
+    parser.add_argument('k')
+    parser.add_argument('graph_file_path')
+    parser.add_argument('--output_path')
+    parser.add_argument('--verbose', '-v', action='store_true')
+    parser.add_argument('--version', action='store_true')
+
+    # All edge periodic graph with the length ?
+    parser.add_argument('--all', '-a')
+    # TODO : Should also add help. The description
+    # should be better by including description of every argument.
+    return parser
+
+
+def extract_graph(graph_str):
+    """
+    Extract the grah from a string.
+    :param graph_str: A graph in JSon format.
+    """
+    try:
+        json_object = json.loads(graph_str)
+    except json.JSONDecodeError:
+        exit(ERROR_ARGS_MSG)
+    return json_object['V'], map(tuple, json_object['E'])
+
+
 def str_time_since(start):
     """
     Return a string that represents the time passed since "start".
@@ -64,7 +120,7 @@ def str_time_since(start):
     MINUTES_TO_NANOSECONDS = 6e10
     SECONDS_TO_NANOSECONDS = 1e9
 
-    delta_time = time.time_ns() - start_time
+    delta_time = time.time_ns() - start
     hours = delta_time // HOURS_TO_NANOSECONDS
     delta_time -= hours * HOURS_TO_NANOSECONDS
     minutes = delta_time // MINUTES_TO_NANOSECONDS
@@ -73,55 +129,51 @@ def str_time_since(start):
     return f'HH:MM:SS = {int(hours)}:{int(minutes)}:{int(seconds)}'
 
 
-if __name__ == '__main__':
-    # TODO: Change the file format to JSON.
-    ERROR_ARGS_MSG = \
-'''Two file names must specified as argument. The first
-one is a file containing an integer greater than 0 on the first
-line that represents the number of cops, an integer greater than 0
-that represents the length of the edge patterns on the second line
-and a list of adjancy vertices on the third line in the following
-format:\n
-\t(1,2), (2,3), (1,3)\n
-This is a list of couples of vertices.\n
-The second file will contain the output of the program. If the
-file doesn't exist, then it will be created. It contains every
-presence mapping of k-cop-winning graph, one per line.
-*** Don't forget to check the permissions of the files. ***'''
-
-    MAX_SIZE_PROBLEMS_QUEUE = int(1e4)
-    MAX_RESOLVER_PROCESSES = None # The pool will use all CPU available.
-
+def main(args):
+    parser = create_parser()
+    parsed_args = parser.parse_args(args)
     
-    print('Analyzing the arguments...')
-    args = sys.argv
-    if len(args) != 3 or not os.access(args[1], os.R_OK):
-        exit(ERROR_ARGS_MSG)
-    if os.access(args[2], os.F_OK) and not os.access(args[2], os.W_OK):
-        exit(ERROR_ARGS_MSG)
+    if parsed_args.version:
+        # If this argument is present, then we show the version and forget
+        # the other arguements.
+        # TODO: To complete
+        return
     
-    V = set(); E = list()
-    k = None; length = None; adjancy = list()
-    file_str = None
-    with open(args[1], 'r') as file:
-        file_str = file.read().split('\n')
-    if len(file_str) != 3:
-        exit(ERROR_ARGS_MSG)
+    if parsed_args.output_path is not None:
+        # If a output path is given, it will be used to output the result,
+        # otherwise the standard output will be used.
+        try:
+            output = open(parsed_args.output_path, 'w')
+        except:
+            # TODO: Manage the exceptions.
+            pass
+    else:
+        output = sys.stdout
+    
+    # Get the graph
     try:
-        k = int(re.search(r'\s*(\d+)\s*', file_str[0]).group(0))
-        length = int(re.search(r'\s*(\d+)\s*', file_str[1]).group(0))
-        for edge_str in re.findall(r'\((.+?)\)',
-                file_str[2].replace(' ', '')):
-            edge_str = edge_str.split(',')
-            u = int(edge_str[0]); v = int(edge_str[1])
-            V.add(u); V.add(v)
-            E.append((u, v))
+        file = open(parsed_args.graph_file_path, 'r')
+        graph_str = file.read()
+        file.close()
     except:
-        exit(ERROR_ARGS_MSG)
-    V = list(V)
+        # TODO: Manage the exceptions.
+        pass
+    graph = extract_graph(graph_str) 
     
-    print('Initialization of the producer, the resolver and '\
-        'the writer processes...')
+    if parsed_args.all:
+        # TODO: To complete
+        pass
+    else:
+        output.write(crg.is_kcop_win(graph[0], graph[1],
+                tau=graph[2] if len(graph) == 2 else None, k=parsed_args.k))
+
+
+
+if __name__ == '__main__':
+    main(sys.argv)
+    
+    #print('Initialization of the producer, the resolver and '\
+    #    'the writer processes...')
     problem_queue = mp.JoinableQueue(MAX_SIZE_PROBLEMS_QUEUE)
     output_queue = mp.JoinableQueue()
     output_file = open(args[2], 'w')
@@ -134,8 +186,8 @@ presence mapping of k-cop-winning graph, one per line.
     output_process = mp.Process(target=output_consume,
             args=(output_queue, output_file))
     
-    print('Computing...')
-    start_time = time.time_ns()
+    #print('Computing...')
+    #start_time = time.time_ns()
     
     output_process.start()
     # Writer process is ready to write k-cops-winnning graph.
@@ -157,4 +209,4 @@ presence mapping of k-cop-winning graph, one per line.
 
     # Flush the buffer and close the file.
     output_file.close()
-    print(f'Computing completed in {str_time_since(start_time)}')
+    #print(f'Computing completed in {str_time_since(start_time)}')
