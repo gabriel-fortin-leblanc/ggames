@@ -4,10 +4,12 @@ A cops and robber game is played on a edge periodic (or static) graph
 """
 
 
-import math
-import functools
-import itertools
-import copy
+import math, copy
+import functools, itertools
+import multiprocessing as mp
+import multiprocessing.pool as mpp
+import threading
+from queue import Empty
 from reachability_game import get_attractor
 
 
@@ -15,15 +17,24 @@ MAX_POOL_PROCESSES = None
 MAX_QUEUE_SIZE = 1000
 
 
-def get_game_graph(V, E, tau=None, k=1):
+def get_game_graph(V, E, tau=None, k=1, multithreading=True,
+        worker_parts=1e-3, buffer_size=1000):
     """
-    Compute the game graph where the k-cops and robber game take place on the
-    edge periodic graph (V, E, tau) with a time horizon "time_horizon". If
-    "tau" is not specified, then the graph is considered to be static.
+    Compute the game graph where the "k"-cops and robber game takes place on
+    the edge periodic graph (V, E, tau). If "tau" is not specified, then the
+    graph is considered to be static. The operation will use a thread pool to
+    execute a part of this function if "multithreading". The task is seperated
+    to the workers by segments of "worker_parts" of the whole process.
     :param V: The list of vertices
     :param E: The list of edges
     :param tau: The presence function of the edges in E in dict
     :param k: The number of cops in the game
+    :param multithreading: A flag that allows multithreading to excute this
+            function
+    :param worker_parts: The pourcentage of the whole process each worker will
+            execute at a time
+    :param buffer_size: The size of the buffer each worker has during the
+            processing
     """
     if tau is None: tau = {e: '1' for e in E}
 
@@ -48,46 +59,79 @@ def get_game_graph(V, E, tau=None, k=1):
                 for *c, r in itertools.product(V, repeat=k+1)]
     
     # Compute the set of arcs of the game graph.
-    def add_to_arcs(A_gg, queue):
-        try:
-            u, v = queue.get(timeout=3)
-            *c0, r0, s0, t0 = u
-            *c1, r1, s1, t1 = v
-            if r0 in c0: return
+    def add_to_set(edge, A_gg, buffer, lock):
+        if buffer is not None:
+            buffer.append(edge)
+            if len(buffer) == buffer_size:
+                with lock:
+                    A_gg.extend(buffer)
+                buffer = []
+        else:
+            A_gg.append(edge)
 
-            if t0 == t1 and not s0 and s1 and r0 == r1:
-                # Cops' move
-                valid_flag = True
-                for i in range(len(c0)):
-                    if c0[i] != c1[i] and \
-                            adjancy[vertex_index[c0[i]]][vertex_index[c1[i]]] \
-                            [t0%len(adjancy[vertex_index[c0[i]]]
-                                [vertex_index[c1[i]]])] == '0':
-                        # It is impossible for a cops to move in
-                        # one rounds to a non adjacent vertex.
-                        valid_flag = False
-                        break
-                if valid_flag:
-                    A_gg.append((u, v))
-            
-            elif (t0 + 1)%time_horizon == t1 and s0 and not s1 and c0 == c1 and \
-                    r1 not in c1:
-                # Robber's move
-                if r0 == r1 or (r0 != r1 and \
-                        adjancy[vertex_index[r0]][vertex_index[r1]] \
-                        [t0%len(adjancy[vertex_index[r0]][vertex_index[r1]])] \
-                            == '1'):
-                    A_gg.append((u, v))
-        except Empty: pass
+    def compute_arcs(from_index, to_index, A_gg, buffer=None, lock=None):
+        for u in V_gg[from_index:to_index]:
+            for v in V_gg:
+                *c0, r0, s0, t0 = u
+                *c1, r1, s1, t1 = v
+                if r0 in c0: continue
+
+                if t0 == t1 and not s0 and s1 and r0 == r1:
+                    # Cops' move
+                    valid_flag = True
+                    for i in range(len(c0)):
+                        if c0[i] != c1[i] and \
+                                adjancy[vertex_index[c0[i]]][vertex_index[c1[i]]] \
+                                [t0%len(adjancy[vertex_index[c0[i]]]
+                                        [vertex_index[c1[i]]])] == '0':
+                            # It is impossible for a cops to move in
+                            # one rounds to a non adjacent vertex.
+                            valid_flag = False
+                            break
+                    if valid_flag:
+                        add_to_set((u, v), A_gg, buffer, lock)
+                    
+                elif (t0 + 1)%time_horizon == t1 and s0 and not s1 and c0 == c1 and \
+                        r1 not in c1:
+                    # Robber's move
+                    if r0 == r1 or (r0 != r1 and \
+                            adjancy[vertex_index[r0]][vertex_index[r1]] \
+                            [t0%len(adjancy[vertex_index[r0]][vertex_index[r1]])] \
+                                == '1'):
+                        add_to_set((u, v), A_gg, buffer, lock)
+
+    def worker_compute_arcs(queue, A_gg, lock):
+        try:
+            from_index, to_index = queue.get(timeout=1)
+        except Empty: return
+        buffer = []
+        compute_arcs(from_index, to_index, A_gg, buffer, lock)
+        with lock:
+            A_gg.extend(buffer)
+        queue.task_done()
 
     A_gg = []
-    queue = mp.JoinableQueue(maxsize=MAX_QUEUE_SIZE)
-    pool = mp.Pool(processes=MAX_POOL_PROCESSES, initializer=add_to_arcs,
-            initargs=(A_gg, queue))
-    for a in itertools.product(V_gg, repeat=2): queue.put(a)
-    queue.join()
-    pool.close()
-    pool.join()
+    if multithreading:
+        lock = mp.Lock()
+        queue = mp.JoinableQueue()
+        pool = mp.Pool(initializer=worker_compute_arcs,
+                initargs=(queue, A_gg, lock))
+        nbr_vertex = len(V_gg)
+        max_iter = int(worker_parts * nbr_vertex ** 2)
+        if max_iter <= nbr_vertex:
+            for i in range(nbr_vertex): queue.put((i, i+1))
+        else:
+            max_index = max_iter // nbr_vertex
+            rest = max_iter % nbr_vertex
+            for i in range(0, nbr_vertex - rest, max_index):
+                queue.put((i, i+max_index))
+            queue.put((nbr_vertex - rest, nbr_vertex))
+
+        queue.join()
+        pool.close()
+        pool.join()
+    else:
+        compute_arcs(0, len(V_gg), A_gg)
 
     return V_gg, A_gg
 
