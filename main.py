@@ -23,22 +23,6 @@ ERROR_OPENING_GRAPH_FILE_MSG = \
 '''The file containing the graph cannot be opened. Check if the file exists
 and if the permission of reading is granted.'''
 
-
-ERROR_ARGS_MSG = \
-'''Two file names must be specified as arguments. The first
-file should contain an integer greater than 0 on the first
-line that represents the number of cops, an integer greater than 0
-on the second line that represents the length of the edge patterns
-and a list of adjacency vertices on the third line in the following
-format:\n
-\t(1,2), (2,3), (1,3)\n
-This is a list of couples of vertices.\n
-The second file should contain the output of the program. If the
-file doesn't exist, then it will be created. It contains every
-presence mapping of the k-cop-winning graph, one per line.
-*** Don't forget to check the permissions of the files. ***'''
-
-
 def create_parser():
     """
     Create the arguments parser of the program.
@@ -47,15 +31,20 @@ def create_parser():
             prog=PROGRAM_NAME,
             description=PROGRAM_DESCRIPTION)
     
-    parser.add_argument('k')
-    parser.add_argument('graph_file_path')
-    parser.add_argument('--output_path', '-o')
-    parser.add_argument('--verbose', '-v', action='store_true')
-    parser.add_argument('--version', action='store_true')
+    parser.add_argument('k', type=int, help="the number of cops in the\
+                        game. (Mandatory)")
+    parser.add_argument('graph_file_path', help="the path to the file\
+                        containing the description of the graph. (Mandatory)")
+    parser.add_argument('--output_path', '-o', help="specify the path to\
+                        the output file containing the presence mapping of\
+                        the k-cop-win graph.")
+    parser.add_argument('--verbose', '-v', action='store_true', help="output \
+                        more information.") # TODO: Needs improvement
+    parser.add_argument('--version', action='store_true', help="show the \
+                        current version of the program.")
     # All edge periodic graph with the length ?
-    parser.add_argument('--all', '-a')
-    # TODO : Should also add help. The description
-    # should be better by including description of every argument.
+    parser.add_argument('--all', '-a', help="compute all snapshots of the \
+                    graph.") # TODO: Needs improvement
     return parser
 
 
@@ -110,8 +99,8 @@ def main(args):
         computer.compute_all_problems(graph[0], graph[1], parsed_args.all,
                 parsed_args.k, output)
     else:
-        output.write(crg.is_kcop_win(graph[0], graph[1],
-                tau=graph[2] if len(graph) == 2 else None, k=parsed_args.k))
+        output.write(str(crg.is_kcop_win(graph[0], graph[1],
+                tau=graph[2] if len(graph) == 3 else None, k=parsed_args.k)))
 
 
 
