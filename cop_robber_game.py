@@ -8,7 +8,7 @@ import math
 import functools
 import itertools
 import copy
-from reachable_game import get_attractor
+from reachability_game import get_attractor
 
 
 def get_game_graph(V, E, tau=None, k=1):
@@ -76,7 +76,7 @@ def get_game_graph(V, E, tau=None, k=1):
     return V_gg, A_gg
 
 
-def game_graph_to_reachable_game(V_gg, A_gg):
+def game_graph_to_reachability_game(V_gg, A_gg):
     """
     Compute and return a reachable game corresponding to the game graph
     G = (V_gg, A_gg).
@@ -106,7 +106,7 @@ def is_kcop_win(V, E, tau, k=1):
     :param k: The number of cops that play on the time-varying graph
     """
     attractor = get_attractor(
-                            *game_graph_to_reachable_game(
+                            *game_graph_to_reachability_game(
                             *get_game_graph(V, E, tau, k)))
 
     n = len(V)
@@ -167,7 +167,7 @@ if __name__ == '__main__':
                          ((3, 2, False, 0), (3, 2, True, 0)),
                          ((3, 2, True, 0), (3, 1, False, 0)),
                          ((3, 2, True, 0), (3, 2, False, 0))}
-    S0, S1, A, F = game_graph_to_reachable_game(V_gg, A_gg)
+    S0, S1, A, F = game_graph_to_reachability_game(V_gg, A_gg)
     assert set(S0) == {(1, 1, False, 0), (1, 2, False, 0),
                        (1, 3, False, 0), (2, 1, False, 0),
                        (2, 2, False, 0), (2, 3, False, 0),
@@ -206,7 +206,7 @@ if __name__ == '__main__':
                          ((2, 2, 1, False, 0), (2, 1, 1, True, 0)),
                          ((2, 2, 1, False, 0), (2, 2, 1, True, 0)),
                          ((2, 2, 1, True, 0), (2, 2, 1, False, 0))}
-    S0, S1, A, F = game_graph_to_reachable_game(V_gg, A_gg)
+    S0, S1, A, F = game_graph_to_reachability_game(V_gg, A_gg)
     assert set(S0) == {(1, 1, 1, False, 0), (1, 1, 2, False, 0),
                        (1, 2, 1, False, 0), (1, 2, 2, False, 0),
                        (2, 1, 1, False, 0), (2, 1, 2, False, 0),
@@ -289,7 +289,7 @@ if __name__ == '__main__':
                          ((3, 2, False, 1), (3, 2, True, 1)),
                          ((3, 2, True, 1), (3, 1, False, 0)),
                          ((3, 2, True, 1), (3, 2, False, 0))}
-    S0, S1, A, F = game_graph_to_reachable_game(V_gg, A_gg)
+    S0, S1, A, F = game_graph_to_reachability_game(V_gg, A_gg)
     assert set(S0) == {(1, 1, False, 0), (1, 2, False, 0),
                        (1, 3, False, 0), (2, 1, False, 0),
                        (2, 2, False, 0), (2, 3, False, 0),

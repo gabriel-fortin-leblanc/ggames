@@ -71,7 +71,6 @@ def output_consume(output_queue, output_file):
     while True:
         try:
             out = output_queue.get(timeout=3)
-            print(f'A {k}-cop-winning graph has been found!')
             output_file.write(out)
             output_file.flush()
             output_queue.task_done()
