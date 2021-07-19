@@ -4,10 +4,10 @@ import itertools
 def get_bit_sequences(length, zero_sequence_included=True):
     """
     Compute every bit sequences of length "length" in str. If the flag
-    "zero_sequence_included" is set to False, then the sequence composed
-    only '0' is not included.
+    "zero_sequence_included" is set to False, then any sequence composed
+    of only '0' is not included.
     :param length: The length of the bit sequence
-    :param zero_sequence_included: A flag for including the sequence of only
+    :param zero_sequence_included: A flag for including sequences of only
                                    '0' in the series.
     """
     return [str(bin(num)).replace('0b', '', 1).rjust(length, '0') for num in

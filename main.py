@@ -8,9 +8,9 @@ import computer
 
 PROGRAM_NAME = 'Cop-number computer'
 PROGRAM_DESCRIPTION = \
-'''This program takes cop-number problem and decide if it is a k-cop-winning
-graph. The graph can be either staic or edge periodic one. It proceeds by
-reducing the problem to a reachability game.'''
+'''This program takes a cop-number problem and decides if it is a k-cop-
+winning graph. The graph can be either static or edge periodic. It proceeds
+by reducing the problem to a reachability game.'''
 PROGRAM_VERSION = \
 '''''' # TODO: To complete
 
@@ -18,24 +18,24 @@ ERROR_JSON_MSG = \
 '''The JSon is not well formatted.'''
 ERROR_OPENING_OUTPUT_FILE_MSG = \
 '''The output file cannot be opened. Check the permissions of the directory,
-or even if the file exists and cannot be overwritten.'''
+or if the file exists and cannot be overwritten.'''
 ERROR_OPENING_GRAPH_FILE_MSG = \
 '''The file containing the graph cannot be opened. Check if the file exists
 and if the permission of reading is granted.'''
 
 
 ERROR_ARGS_MSG = \
-'''Two file names must specified as argument. The first
-one is a file containing an integer greater than 0 on the first
+'''Two file names must be specified as arguments. The first
+file should contain an integer greater than 0 on the first
 line that represents the number of cops, an integer greater than 0
-that represents the length of the edge patterns on the second line
-and a list of adjancy vertices on the third line in the following
+on the second line that represents the length of the edge patterns
+and a list of adjacency vertices on the third line in the following
 format:\n
 \t(1,2), (2,3), (1,3)\n
 This is a list of couples of vertices.\n
-The second file will contain the output of the program. If the
+The second file should contain the output of the program. If the
 file doesn't exist, then it will be created. It contains every
-presence mapping of k-cop-winning graph, one per line.
+presence mapping of the k-cop-winning graph, one per line.
 *** Don't forget to check the permissions of the files. ***'''
 
 
@@ -61,7 +61,7 @@ def create_parser():
 
 def extract_graph(graph_str):
     """
-    Extract the grah from a string.
+    Extract the graph from a string.
     :param graph_str: A graph in JSon format.
     """
     json_object = json.loads(graph_str)
@@ -80,8 +80,8 @@ def main(args):
         exit(0)
     
     if parsed_args.output_path is not None:
-        # If a output path is given, it will be used to output the result,
-        # otherwise the standard output will be used.
+        # If an output path is given, it will be used to output the result.
+        # Otherwise, the standard output will be used.
         try:
             output = open(parsed_args.output_path, 'w')
         except OSError as error:

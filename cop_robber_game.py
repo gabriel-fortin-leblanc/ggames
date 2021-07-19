@@ -1,5 +1,5 @@
 """
-A cops and robber game is played on a edge periodic (or static) graph
+A cops and robber game is played on an edge periodic (or static) graph
 (V, E, tau) where tau is the presence mapping of the edges.
 """
 
@@ -23,9 +23,9 @@ def get_game_graph(V, E, tau=None, k=1):
     """
     if tau is None: tau = {e: '1' for e in E}
 
-    # Compute an adjancy matrix to simplify the algorithm.
+    # Compute an adjacency matrix to simplify the algorithm.
     vertex_index = {u: index for index, u in enumerate(V)}
-    adjancy = [[tau[(u, v)] if (u, v) in tau else
+    adjacency = [[tau[(u, v)] if (u, v) in tau else
                     tau[(v, u)] if (v, u) in tau else
                     '0' for u in V] for v in V]
     
@@ -55,11 +55,11 @@ def get_game_graph(V, E, tau=None, k=1):
             valid_flag = True
             for i in range(len(c0)):
                 if c0[i] != c1[i] and \
-                        adjancy[vertex_index[c0[i]]][vertex_index[c1[i]]] \
-                        [t0%len(adjancy[vertex_index[c0[i]]]
+                        adjacency[vertex_index[c0[i]]][vertex_index[c1[i]]] \
+                        [t0%len(adjacency[vertex_index[c0[i]]]
                             [vertex_index[c1[i]]])] == '0':
-                    # It is impossible for a cops to move in
-                    # one rounds to a non adjacent vertex.
+                    # It is impossible for a cop to move to
+                    # a nonadjacent vertex in one round.
                     valid_flag = False
                     break
             if valid_flag:
@@ -69,8 +69,8 @@ def get_game_graph(V, E, tau=None, k=1):
                 r1 not in c1:
             # Robber's move
             if r0 == r1 or (r0 != r1 and \
-                    adjancy[vertex_index[r0]][vertex_index[r1]] \
-                    [t0%len(adjancy[vertex_index[r0]][vertex_index[r1]])] \
+                    adjacency[vertex_index[r0]][vertex_index[r1]] \
+                    [t0%len(adjacency[vertex_index[r0]][vertex_index[r1]])] \
                         == '1'):
                 A_gg.append((u, v))
     return V_gg, A_gg

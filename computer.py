@@ -25,9 +25,9 @@ def str_time_since(start):
 
 def produce(V, E, sequence_length, k, problem_queue):
     """
-    Initialize every "k"-cops and robber problem on edge periodic graph with a
-    footprint ("V", "E") and edge pattern lengths of "sequence_length", and
-    add them to the "problem_queue".
+    Initialize every "k"-cops and robber problem on an edge periodic graph 
+    with a footprint ("V", "E") and edge pattern lengths of "sequence_length",
+    and add them to the "problem_queue".
     :param V: A list of vertices
     :param E: A list of edges
     :param sequence_length: The length of the edge patterns
@@ -43,7 +43,7 @@ def produce(V, E, sequence_length, k, problem_queue):
 def problem_consume(problem_queue, output_queue):
     """
     Take a problem from the "problem_queue" and decide if it's k-cop-win. If
-    it is, then the it adds the presence_map in the "output_queue" in string.
+    it is, then the presence_map is added to the "output_queue" in string form.
     :param problem_queue: A thread-safe queue containing the problems
     :param output_queue: A queue to add the presence maps.
     """

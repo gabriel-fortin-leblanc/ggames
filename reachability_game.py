@@ -8,7 +8,7 @@ of elements of S_0 U S_1.
 def get_attractor(S0, S1, A, F):
     """
     Compute the attractor set.
-    Credit : Dietmar Berwanger in "Graph games with perfect information"
+    Credit: Dietmar Berwanger in "Graph games with perfect information"
     :param S0: A list of vertices
     :param S1: A list of vertices (must be disjointed of S0)
     :param A: A sub-list (subset) of S0 x S1 U S1 x S0
@@ -54,7 +54,7 @@ def get_next_winning_moves(current_vertex, A, attractor, player0_move=True):
     :param current_vertex: A vertex
     :param A: A list of arcs
     :param attractor: A list representing the attractor set.
-    :param player0_move: A flag meaning that is at the player 0 to play.
+    :param player0_move: A flag meaning that it's player 0's turn to play.
     """
     attractor_set = set(attractor)
     if player0_move:
