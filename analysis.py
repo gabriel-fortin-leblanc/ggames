@@ -24,18 +24,20 @@ for name in GRAPH_JSON_NAME:
 """
 Analysis of cop_robber_game.get_game_graph
 """
-NUMBER_TEST = 100
-ks = [ 1, 2, 4 ]
+NUMBER_TEST = 10 # Each call is expensive in time.
+ks = [ 1, 2 ]
 time_multithreaging = [[] for _ in range(len(GRAPH_JSON_NAME))]
 time_no_multithreading = [[] for _ in range(len(GRAPH_JSON_NAME))]
 for i, graph in enumerate(graphs):
     V, E, tau = graph
-    for k, in ks:
+    for k in ks:
         mean = timeit.timeit('get_game_graph(V, E, tau, k)',
                 globals=globals(), number=NUMBER_TEST)
+        print(f'name = {GRAPH_JSON_NAME[i]}; k = {k}; THREADING; time = {mean}')
         time_multithreaging[i].append(mean)
         mean = timeit.timeit('get_game_graph(V, E, tau, k, False)',
                 globals=globals(), number=NUMBER_TEST)
+        print(f'name = {GRAPH_JSON_NAME[i]}; k = {k}; NO_THREADING; time = {mean}')
         time_no_multithreading[i].append(mean)
 
 OUTPUT_NAME = 'output_analysis.csv'
@@ -44,9 +46,9 @@ with open(OUTPUT_NAME, 'w', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, FIELD_NAMES)
     
     writer.writeheader()
-    for i, name in GRAPH_JSON_NAME:
+    for i, name in enumerate(GRAPH_JSON_NAME):
         writer.writerow({
                 **{'name': name},
-                **{f'{k}t': time_multithreaging[j] for j, k in enumerate(ks)},
-                **{str(k): time_no_multithreading[j] for j, k in enumerate(k)}
+                **{f'{k}t': time_multithreaging[i][j] for j, k in enumerate(ks)},
+                **{str(k): time_no_multithreading[i][j] for j, k in enumerate(ks)}
                 })

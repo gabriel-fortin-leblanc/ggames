@@ -15,7 +15,7 @@ MAX_QUEUE_SIZE = 1000
 
 
 def get_game_graph(V, E, tau=None, k=1, multithreading=True,
-        worker_parts=1e-3):
+        worker_parts=1e-1):
     """
     Compute the game graph where the "k"-cops and robber game takes place on
     the edge periodic graph (V, E, tau). If "tau" is not specified, then the
