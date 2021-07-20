@@ -7,8 +7,7 @@ A cops and robber game is played on a edge periodic (or static) graph
 import math, copy
 import functools, itertools
 import multiprocessing as mp
-import multiprocessing.pool as mpp
-import threading
+import concurrent.futures as futures
 from queue import Empty
 from reachability_game import get_attractor
 
@@ -18,7 +17,7 @@ MAX_QUEUE_SIZE = 1000
 
 
 def get_game_graph(V, E, tau=None, k=1, multithreading=True,
-        worker_parts=1e-3, buffer_size=1000):
+        worker_parts=1e-3):
     """
     Compute the game graph where the "k"-cops and robber game takes place on
     the edge periodic graph (V, E, tau). If "tau" is not specified, then the
@@ -33,8 +32,6 @@ def get_game_graph(V, E, tau=None, k=1, multithreading=True,
             function
     :param worker_parts: The pourcentage of the whole process each worker will
             execute at a time
-    :param buffer_size: The size of the buffer each worker has during the
-            processing
     """
     if tau is None: tau = {e: '1' for e in E}
 
@@ -57,24 +54,14 @@ def get_game_graph(V, E, tau=None, k=1, multithreading=True,
                 for t in range(time_horizon)
                 for s in [False, True]
                 for *c, r in itertools.product(V, repeat=k+1)]
-    
-    # Compute the set of arcs of the game graph.
-    def add_to_set(edge, A_gg, buffer, lock):
-        if buffer is not None:
-            buffer.append(edge)
-            if len(buffer) == buffer_size:
-                with lock:
-                    A_gg.extend(buffer)
-                buffer = []
-        else:
-            A_gg.append(edge)
 
-    def compute_arcs(from_index, to_index, A_gg, buffer=None, lock=None):
+    def compute_arcs(from_index, to_index):
+        buffer = []
         for u in V_gg[from_index:to_index]:
+            *c0, r0, s0, t0 = u
+            if r0 in c0: continue
             for v in V_gg:
-                *c0, r0, s0, t0 = u
                 *c1, r1, s1, t1 = v
-                if r0 in c0: continue
 
                 if t0 == t1 and not s0 and s1 and r0 == r1:
                     # Cops' move
@@ -89,7 +76,7 @@ def get_game_graph(V, E, tau=None, k=1, multithreading=True,
                             valid_flag = False
                             break
                     if valid_flag:
-                        add_to_set((u, v), A_gg, buffer, lock)
+                        buffer.append((u, v))
                     
                 elif (t0 + 1)%time_horizon == t1 and s0 and not s1 and c0 == c1 and \
                         r1 not in c1:
@@ -98,40 +85,33 @@ def get_game_graph(V, E, tau=None, k=1, multithreading=True,
                             adjancy[vertex_index[r0]][vertex_index[r1]] \
                             [t0%len(adjancy[vertex_index[r0]][vertex_index[r1]])] \
                                 == '1'):
-                        add_to_set((u, v), A_gg, buffer, lock)
+                        buffer.append((u, v))
+        return buffer  
 
-    def worker_compute_arcs(queue, A_gg, lock):
-        try:
-            from_index, to_index = queue.get(timeout=1)
-        except Empty: return
-        buffer = []
-        compute_arcs(from_index, to_index, A_gg, buffer, lock)
-        with lock:
-            A_gg.extend(buffer)
-        queue.task_done()
-
-    A_gg = []
     if multithreading:
-        lock = mp.Lock()
-        queue = mp.JoinableQueue()
-        pool = mp.Pool(initializer=worker_compute_arcs,
-                initargs=(queue, A_gg, lock))
-        nbr_vertex = len(V_gg)
-        max_iter = int(worker_parts * nbr_vertex ** 2)
-        if max_iter <= nbr_vertex:
-            for i in range(nbr_vertex): queue.put((i, i+1))
-        else:
-            max_index = max_iter // nbr_vertex
-            rest = max_iter % nbr_vertex
-            for i in range(0, nbr_vertex - rest, max_index):
-                queue.put((i, i+max_index))
-            queue.put((nbr_vertex - rest, nbr_vertex))
-
-        queue.join()
-        pool.close()
-        pool.join()
+        A_gg = []
+        with futures.ThreadPoolExecutor() as executor:
+            future_results = []
+            nbr_vertex = len(V_gg)
+            max_iter = int(worker_parts * nbr_vertex ** 2)
+            if max_iter <= nbr_vertex:
+                for i in range(nbr_vertex):
+                    future = executor.submit(compute_arcs, i, i+1)
+                    future_results.append(future)
+            else:
+                max_index = max_iter // nbr_vertex
+                rest = max_iter % nbr_vertex
+                for i in range(0, nbr_vertex - rest, max_index):
+                    future = executor.submit(compute_arcs,
+                            i, i+max_index)
+                    future_results.append(future)
+                future = executor.submit(compute_arcs,
+                        nbr_vertex - rest, nbr_vertex)
+                future_results.append(future)
+            for future in future_results:
+                A_gg.extend(future.result())
     else:
-        compute_arcs(0, len(V_gg), A_gg)
+        A_gg = compute_arcs(0, len(V_gg))
 
     return V_gg, A_gg
 
