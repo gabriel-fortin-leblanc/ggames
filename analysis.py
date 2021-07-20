@@ -25,23 +25,20 @@ for name in GRAPH_JSON_NAME:
 Analysis of cop_robber_game.get_game_graph
 """
 NUMBER_TEST = 10 # Each call is expensive in time.
-ks = [ 1, 2 ]
-time_multithreaging = [[] for _ in range(len(GRAPH_JSON_NAME))]
-time_no_multithreading = [[] for _ in range(len(GRAPH_JSON_NAME))]
+ks = [ 1, 2, 3 ]
+times = [[] for _ in range(len(GRAPH_JSON_NAME))]
 for i, graph in enumerate(graphs):
     V, E, tau = graph
     for k in ks:
         mean = timeit.timeit('get_game_graph(V, E, tau, k)',
                 globals=globals(), number=NUMBER_TEST)
-        print(f'name = {GRAPH_JSON_NAME[i]}; k = {k}; THREADING; time = {mean}')
-        time_multithreaging[i].append(mean)
-        mean = timeit.timeit('get_game_graph(V, E, tau, k, False)',
+        mean = timeit.timeit('get_game_graph(V, E, tau, k)',
                 globals=globals(), number=NUMBER_TEST)
-        print(f'name = {GRAPH_JSON_NAME[i]}; k = {k}; NO_THREADING; time = {mean}')
-        time_no_multithreading[i].append(mean)
+        print(f'name = {GRAPH_JSON_NAME[i]}; k = {k}; time = {mean}')
+        times[i].append(mean)
 
-OUTPUT_NAME = 'output_analysis.csv'
-FIELD_NAMES = ['name'] + [f'{k}t' for k in ks] + [str(k) for k in ks]
+OUTPUT_NAME = 'output_analysis_new_algo.csv'
+FIELD_NAMES = ['name'] + [str(k) for k in ks]
 with open(OUTPUT_NAME, 'w', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, FIELD_NAMES)
     
@@ -49,6 +46,5 @@ with open(OUTPUT_NAME, 'w', newline='') as csvfile:
     for i, name in enumerate(GRAPH_JSON_NAME):
         writer.writerow({
                 **{'name': name},
-                **{f'{k}t': time_multithreaging[i][j] for j, k in enumerate(ks)},
-                **{str(k): time_no_multithreading[i][j] for j, k in enumerate(ks)}
+                **{str(k): times[i][j] for j, k in enumerate(ks)}
                 })
