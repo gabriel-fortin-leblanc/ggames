@@ -6,9 +6,7 @@ A cops and robber game is played on a edge periodic (or static) graph
 
 import math, copy
 import functools, itertools
-import multiprocessing as mp
 import concurrent.futures as futures
-from queue import Empty
 from reachability_game import get_attractor
 
 
