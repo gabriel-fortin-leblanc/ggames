@@ -1,6 +1,7 @@
 from ast import parse
 import sys, time, json, argparse
 import multiprocessing as mp
+from itertools import chain
 
 import cop_robber_game as crg
 import computer
@@ -54,7 +55,23 @@ def extract_graph(graph_str):
     :param graph_str: A graph in JSon format.
     """
     json_object = json.loads(graph_str)
+
+    # Validate that the list of edges does not contain inexistent vertices.
+    for i in set(list(chain(*json_object['E']))):
+        if i not in json_object['V']:
+            raise ValueError("Unexpected value detected in 'E' variable.")
+    
+    if 'tau' in graph_str:
+        #Validate that every edge has a corresponding binary string.
+        if len(json_object['E']) != len(json_object['tau']):
+            raise ValueError("Unexpected number of elements in 'tau' variable.")
+        
+        # Validate that all elements in 'tau' are composed of binary strings.
+        for binary_str in set(json_object['tau']):
+            if not all(x in "01" for x in binary_str):
+                raise ValueError("Unexpected value detected in 'tau' variable.")
     return json_object['V'], map(tuple, json_object['E'])
+
 
 
 
