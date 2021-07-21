@@ -1,4 +1,4 @@
-import sys, json, argparse, re
+import sys, json, argparse, re, logging
 import itertools
 import cop_robber_game as crg
 
@@ -49,7 +49,7 @@ def extract_graph(graph_str):
     :param graph_str: A graph in JSon format.
     """
     json_object = json.loads(graph_str)
-    V = json_object['V']; E = map(tuple, json_object['E'])
+    V = json_object['V']; E = list(map(tuple, json_object['E']))
 
     # Validate that the list of edges does not contain inexistent vertices.
     V_set = set(json_object['V'])
@@ -59,14 +59,14 @@ def extract_graph(graph_str):
     
     # Validate that every edge has a corresponding binary string.
     if 'tau' in graph_str:
-        tau = json_object['tau']
+        tau = {E[i]: seq for i, seq in enumerate(json_object['tau'])}
         if len(E) != len(tau):
             raise ValueError("Unexpected number of elements in 'tau' '\
                     'variable.")
         
         # Validate that all elements in 'tau' are composed of binary strings.
         bin_regex = re.compile('^(0*10*)+$')
-        for binary_str in tau:
+        for binary_str in tau.values():
             if bin_regex.fullmatch(binary_str) is None:
                 raise ValueError("Unexpected value detected in 'tau' '\
                         'variable.")
@@ -85,6 +85,14 @@ def main(args):
         print(PROGRAM_VERSION)
         exit(0)
     
+    logger = logging.getLogger('main')
+    if parsed_args.verbose is not None:
+        # Activate the logger.
+        logger.setLevel(logging.INFO)
+        logger_handler = logging.StreamHandler(stream=sys.stdout)
+        logger_handler.setLevel(logging.INFO)
+        logger.addHandler(logger_handler)
+    
     if parsed_args.output_path is not None:
         # If an output path is given, it will be used to output the result.
         # Otherwise, the standard output will be used.
@@ -92,12 +100,13 @@ def main(args):
             output = open(parsed_args.output_path, 'w')
         except OSError as error:
             sys.stderr.write(f'{ERROR_OPENING_OUTPUT_FILE_MSG}\n'\
-                    '{error.strerror}')
+                    f'{error.strerror}')
             exit(error.errno)
     else:
         output = sys.stdout
     
     # Get the graph
+    logger.info('Loading the graph...')
     try:
         file = open(parsed_args.graph_file_path, 'r')
         graph_str = file.read()
@@ -105,16 +114,18 @@ def main(args):
         graph = extract_graph(graph_str)
     except OSError as error:
         sys.stderr.write(f'{ERROR_OPENING_GRAPH_FILE_MSG}\n'\
-                '{error.strerror}')
+                f'{error.strerror}')
         exit(error.errno)
     except json.JSONDecodeError as error:
         sys.stderr.write(f'{ERROR_JSON_MSG}\n{error.msg}')
         exit(1) # TODO: Find the proper error code for not well formatted JSON
     except ValueError as error:
         sys.stderr.write(str(error))
-    
-    output.write(str(crg.is_kcop_win(graph[0], graph[1],
-            tau=graph[2] if len(graph) == 3 else None, k=parsed_args.k)))
+    logger.info('Graph loaded.')
+
+    result = crg.is_kcop_win(graph[0], graph[1],
+            tau=graph[2] if len(graph) == 3 else None, k=parsed_args.k)
+    output.write(f'{result}\n')
 
 
 

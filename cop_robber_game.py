@@ -4,9 +4,11 @@ A cops and robber game is played on an edge periodic (or static) graph
 """
 
 
+import logging
 import math, copy
 import functools, itertools
 from reachability_game import get_attractor
+
 
 
 def get_game_graph(V, E, tau=None, k=1):
@@ -19,6 +21,9 @@ def get_game_graph(V, E, tau=None, k=1):
     :param tau: The presence function of the edges in E in dict
     :param k: The number of cops in the game
     """
+    logger = logging.getLogger('main.cop_robber_game')
+    logger.info('"cop_robber_game.get_game_graph" called.')
+
     if tau is None: tau = {e: '1' for e in E}
 
     # Compute an adjacency matrix to simplify the algorithm.
@@ -80,6 +85,9 @@ def game_graph_to_reachability_game(V_gg, A_gg):
     :param V_gg: A list of vertices of a game graph
     :param A_gg: A list of edges of a game graph
     """
+    logger = logging.getLogger('main.com_robber_game')
+    logger.info('"cop_robber_game.game_graph_to_reachability_game" called.')
+
     S0 = []; S1 = []
     A = copy.deepcopy(A_gg)
     F = []
@@ -102,6 +110,9 @@ def is_kcop_win(V, E, tau, k=1):
     :param tau: A map from E to a set of bit sequences
     :param k: The number of cops that play on the time-varying graph
     """
+    logger = logging.getLogger('main.com_robber_game')
+    logger.info('"cop_robber_game.is_kcop_win" called.')
+
     attractor = get_attractor(
                             *game_graph_to_reachability_game(
                             *get_game_graph(V, E, tau, k)))

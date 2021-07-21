@@ -4,6 +4,8 @@ directed graph (S_0 U S_1, A) and F is a subset of S_1. A is a list of pairs
 of elements of S_0 U S_1.
 """
 
+import logging
+
 
 def get_attractor(S0, S1, A, F):
     """
@@ -14,6 +16,9 @@ def get_attractor(S0, S1, A, F):
     :param A: A sub-list (subset) of S0 x S1 U S1 x S0
     :param F: A sub-list (subset) of S1 as list.
     """
+    logger = logging.getLogger('main.reachability_game')
+    logger.info('"reachability_game.get_attractor" called.')
+
     def propagate(vertex, in_attractor, num_out_degree, previous, S0_set):
         if in_attractor[vertex]: return
 
@@ -56,6 +61,9 @@ def get_next_winning_moves(current_vertex, A, attractor, player0_move=True):
     :param attractor: A list representing the attractor set.
     :param player0_move: A flag meaning that it's player 0's turn to play.
     """
+    logger = logging.getLogger('main.reachability_game')
+    logger.info('"reachability_game.get_next_winning_moves" called.')
+
     attractor_set = set(attractor)
     if player0_move:
         return [v for u, v in A if u == current_vertex and v in attractor_set]
