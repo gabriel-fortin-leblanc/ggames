@@ -115,14 +115,10 @@ def main(args):
         sys.stderr.write(f'{ERROR_JSON_MSG}\n{error.msg}')
         exit(1) # TODO: Find the proper error code for not well formatted JSON
     except ValueError as error:
-        sys.stderr.write(error)
+        sys.stderr.write(str(error))
     
-    if parsed_args.all:
-        computer.compute_all_problems(graph[0], graph[1], parsed_args.all,
-                parsed_args.k, output)
-    else:
-        output.write(str(crg.is_kcop_win(graph[0], graph[1],
-                tau=graph[2] if len(graph) == 3 else None, k=parsed_args.k)))
+    output.write(str(crg.is_kcop_win(graph[0], graph[1],
+            tau=graph[2] if len(graph) == 3 else None, k=parsed_args.k)))
 
 
 
