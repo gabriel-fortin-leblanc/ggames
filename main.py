@@ -1,11 +1,12 @@
 from ast import parse
-import sys, time, json, argparse
-import multiprocessing as mp
+import sys, json, argparse, re
 from itertools import chain
+from typing_extensions import TypeVarTuple
 
 import cop_robber_game as crg
 import computer
 
+VERSION = '0.1'
 
 PROGRAM_NAME = 'Cop-number computer'
 PROGRAM_DESCRIPTION = \
@@ -13,7 +14,7 @@ PROGRAM_DESCRIPTION = \
 winning graph. The graph can be either static or edge periodic. It proceeds
 by reducing the problem to a reachability game.'''
 PROGRAM_VERSION = \
-'''''' # TODO: To complete
+f'''Version {VERSION} (This is the initial version).'''
 
 ERROR_JSON_MSG = \
 '''The JSon is not well formatted.'''
@@ -43,9 +44,6 @@ def create_parser():
                         more information.") # TODO: Needs improvement
     parser.add_argument('--version', action='store_true', help="show the \
                         current version of the program.")
-    # All edge periodic graph with the length ?
-    parser.add_argument('--all', '-a', help="compute all snapshots of the \
-                    graph.") # TODO: Needs improvement
     return parser
 
 
@@ -55,23 +53,29 @@ def extract_graph(graph_str):
     :param graph_str: A graph in JSon format.
     """
     json_object = json.loads(graph_str)
+    V = json_object['V']; E = map(tuple, json_object['E'])
 
     # Validate that the list of edges does not contain inexistent vertices.
-    for i in set(list(chain(*json_object['E']))):
-        if i not in json_object['V']:
+    V_set = set(json_object['V'])
+    for u in chain(*json_object['E']):
+        if u not in V_set:
             raise ValueError("Unexpected value detected in 'E' variable.")
     
+    # Validate that every edge has a corresponding binary string.
     if 'tau' in graph_str:
-        #Validate that every edge has a corresponding binary string.
-        if len(json_object['E']) != len(json_object['tau']):
-            raise ValueError("Unexpected number of elements in 'tau' variable.")
+        tau = json_object['tau']
+        if len(E) != len(tau):
+            raise ValueError("Unexpected number of elements in 'tau' \
+                    variable.")
         
         # Validate that all elements in 'tau' are composed of binary strings.
-        for binary_str in set(json_object['tau']):
-            if not all(x in "01" for x in binary_str):
-                raise ValueError("Unexpected value detected in 'tau' variable.")
-    return json_object['V'], map(tuple, json_object['E'])
-
+        bin_regex = re.compile('^(0*10*)+$')
+        for binary_str in tau:
+            if bin_regex.fullmatch(binary_str) is None:
+                raise ValueError("Unexpected value detected in 'tau' \
+                        variable.")
+        return V, E, tau
+    return V, E
 
 
 
@@ -102,15 +106,16 @@ def main(args):
         file = open(parsed_args.graph_file_path, 'r')
         graph_str = file.read()
         file.close()
+        graph = extract_graph(graph_str)
     except OSError as error:
         sys.stderr.write(f'{ERROR_OPENING_GRAPH_FILE_MSG}\n'\
                 '{error.strerror}')
         exit(error.errno)
-    try:
-        graph = extract_graph(graph_str)
     except json.JSONDecodeError as error:
         sys.stderr.write(f'{ERROR_JSON_MSG}\n{error.msg}')
         exit(1) # TODO: Find the proper error code for not well formatted JSON
+    except ValueError as error:
+        sys.stderr.write(error)
     
     if parsed_args.all:
         computer.compute_all_problems(graph[0], graph[1], parsed_args.all,
