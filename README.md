@@ -32,6 +32,11 @@ The program takes in two arguments: a cop number and a JSON file describing the 
    ```
 Several sample graphs can be found under the folder titled "graph_test_dir".
 
+There's also a list of optional arguments:
+
+## References
+
+
 ## Contribute
 
 
