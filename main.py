@@ -1,10 +1,6 @@
-from ast import parse
 import sys, json, argparse, re
-from itertools import chain
-from typing_extensions import TypeVarTuple
-
+import itertools
 import cop_robber_game as crg
-import computer
 
 VERSION = '0.1'
 
@@ -33,17 +29,17 @@ def create_parser():
             prog=PROGRAM_NAME,
             description=PROGRAM_DESCRIPTION)
     
-    parser.add_argument('k', type=int, help="the number of cops in the\
-                        game. (Mandatory)")
-    parser.add_argument('graph_file_path', help="the path to the file\
-                        containing the description of the graph. (Mandatory)")
-    parser.add_argument('--output_path', '-o', help="specify the path to\
-                        the output file containing the presence mapping of\
-                        the k-cop-win graph.")
-    parser.add_argument('--verbose', '-v', action='store_true', help="output \
-                        more information.") # TODO: Needs improvement
-    parser.add_argument('--version', action='store_true', help="show the \
-                        current version of the program.")
+    parser.add_argument('k', type=int, help=
+            'The number of cops in the game.')
+    parser.add_argument('graph_file_path', help=
+            'The path to the file containing the description of the graph.')
+    parser.add_argument('--output_path', '-o', help=
+            'Specify the path to the output file containing the presence '\
+            'mapping of the k-cop-win graph.')
+    parser.add_argument('--verbose', '-v', action='store_true', help=
+            'Output more information.') # TODO: Needs improvement
+    parser.add_argument('--version', action='store_true', help=
+            'Show the current version of the program.')
     return parser
 
 
@@ -57,7 +53,7 @@ def extract_graph(graph_str):
 
     # Validate that the list of edges does not contain inexistent vertices.
     V_set = set(json_object['V'])
-    for u in chain(*json_object['E']):
+    for u in itertools.chain(*json_object['E']):
         if u not in V_set:
             raise ValueError("Unexpected value detected in 'E' variable.")
     
@@ -65,15 +61,15 @@ def extract_graph(graph_str):
     if 'tau' in graph_str:
         tau = json_object['tau']
         if len(E) != len(tau):
-            raise ValueError("Unexpected number of elements in 'tau' \
-                    variable.")
+            raise ValueError("Unexpected number of elements in 'tau' '\
+                    'variable.")
         
         # Validate that all elements in 'tau' are composed of binary strings.
         bin_regex = re.compile('^(0*10*)+$')
         for binary_str in tau:
             if bin_regex.fullmatch(binary_str) is None:
-                raise ValueError("Unexpected value detected in 'tau' \
-                        variable.")
+                raise ValueError("Unexpected value detected in 'tau' '\
+                        'variable.")
         return V, E, tau
     return V, E
 
