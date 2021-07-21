@@ -9,20 +9,12 @@ def get_attractor(S0, S1, A, F):
     """
     Compute the attractor set.
     Credit: Dietmar Berwanger in "Graph games with perfect information"
+    This algorithm has been modified to don't use recursions.
     :param S0: A list of vertices
     :param S1: A list of vertices (must be disjointed of S0)
     :param A: A sub-list (subset) of S0 x S1 U S1 x S0
     :param F: A sub-list (subset) of S1 as list.
     """
-    def propagate(vertex, in_attractor, num_out_degree, previous, S0_set):
-        if in_attractor[vertex]: return
-
-        in_attractor[vertex] = True
-        for prev in previous[vertex]:
-            num_out_degree[prev] -= 1
-            if prev in S0_set or num_out_degree[prev] == 0:
-                propagate(prev, in_attractor, num_out_degree, previous,
-                    S0_set)
 
     in_attractor = dict()
     previous = dict()
@@ -38,8 +30,16 @@ def get_attractor(S0, S1, A, F):
         previous[v].add(u)
         num_out_degree[u] += 1
     
-    for v in F:
-        propagate(v, in_attractor, num_out_degree, previous, S0_set)
+    propagate_stack = list(F)
+    while len(propagate_stack) > 0:
+        vertex = propagate_stack.pop()
+        in_attractor[vertex] = True
+
+        for prev in previous[vertex]:
+            num_out_degree[prev] -= 1
+            if (prev in S0_set or num_out_degree[prev] == 0) \
+                    and not in_attractor[prev]:
+                propagate_stack.append(prev)
     
     return [vertex for vertex, is_in_attractor in in_attractor.items()
                 if is_in_attractor]
