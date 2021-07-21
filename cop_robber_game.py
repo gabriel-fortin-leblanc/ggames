@@ -4,18 +4,16 @@ A cops and robber game is played on an edge periodic (or static) graph
 """
 
 
-import math
-import functools
-import itertools
-import copy
+import math, copy
+import functools, itertools
 from reachability_game import get_attractor
 
 
 def get_game_graph(V, E, tau=None, k=1):
     """
-    Compute the game graph where the k-cops and robber game take place on the
-    edge periodic graph (V, E, tau) with a time horizon "time_horizon". If
-    "tau" is not specified, then the graph is considered to be static.
+    Compute the game graph where the "k"-cops and robber game takes place on
+    the edge periodic graph (V, E, tau). If "tau" is not specified, then the
+    graph is considered to be static.
     :param V: The list of vertices
     :param E: The list of edges
     :param tau: The presence function of the edges in E in dict
@@ -27,6 +25,7 @@ def get_game_graph(V, E, tau=None, k=1):
     vertex_index = {u: index for index, u in enumerate(V)}
     adjacency = [[tau[(u, v)] if (u, v) in tau else
                     tau[(v, u)] if (v, u) in tau else
+                    '1' if u == v else
                     '0' for u in V] for v in V]
     
     # Compute the least common multiple.
@@ -38,41 +37,39 @@ def get_game_graph(V, E, tau=None, k=1):
                 pattern_lengths)
 
     # Compute the set of vertices of the game graph.
-    V_gg = [(*c, r, s, t)
-                for t in range(time_horizon)
-                for s in [False, True]
-                for *c, r in itertools.product(V, repeat=k+1)]
-    
-    # Compute the set of arcs of the game graph.
-    A_gg = []
-    for u, v in itertools.product(V_gg, repeat=2):
-        *c0, r0, s0, t0 = u
-        *c1, r1, s1, t1 = v
-        if r0 in c0: continue
+    V_gg = []; A_gg = []
+    for t in range(time_horizon):
+        for s in [False, True]:
+            for *c, r in itertools.product(V, repeat=k+1):
+                u = (*c, r, s, t)
+                V_gg.append(u)
+                if r in c: continue
 
-        if t0 == t1 and not s0 and s1 and r0 == r1:
-            # Cops' move
-            valid_flag = True
-            for i in range(len(c0)):
-                if c0[i] != c1[i] and \
-                        adjacency[vertex_index[c0[i]]][vertex_index[c1[i]]] \
-                        [t0%len(adjacency[vertex_index[c0[i]]]
-                            [vertex_index[c1[i]]])] == '0':
-                    # It is impossible for a cop to move to
-                    # a nonadjacent vertex in one round.
-                    valid_flag = False
-                    break
-            if valid_flag:
-                A_gg.append((u, v))
-        
-        elif (t0 + 1)%time_horizon == t1 and s0 and not s1 and c0 == c1 and \
-                r1 not in c1:
-            # Robber's move
-            if r0 == r1 or (r0 != r1 and \
-                    adjacency[vertex_index[r0]][vertex_index[r1]] \
-                    [t0%len(adjacency[vertex_index[r0]][vertex_index[r1]])] \
-                        == '1'):
-                A_gg.append((u, v))
+                next_s = not s
+                if s: # Robber's move
+                    for next_r in V:
+                        edge_pattern = adjacency[vertex_index[r]] \
+                                [vertex_index[next_r]]
+                        if edge_pattern[t%len(edge_pattern)] == '0' \
+                                or next_r in c:
+                            continue
+                        A_gg.append((u, (*c, next_r, next_s,
+                                (t+1)%time_horizon)))
+                else: # Cops' move
+                    for next_c in itertools.product(V, repeat=k):
+                        valid_flag = True # This can be more effective
+                        for i in range(len(c)):
+                            edge_pattern = adjacency[vertex_index[c[i]]] \
+                                    [vertex_index[next_c[i]]]
+                            if c[i] != next_c[i] and \
+                                    edge_pattern[t%len(edge_pattern)] == '0':
+                                # It is impossible for a cops to move in
+                                # one rounds to a non adjacent vertex.
+                                valid_flag = False
+                                break
+                        if valid_flag:
+                            A_gg.append((u, (*next_c, r, next_s,t)))
+
     return V_gg, A_gg
 
 
