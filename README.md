@@ -27,7 +27,7 @@ The program takes in two arguments: a cop number and a JSON file describing the 
    ```
 Several sample graphs can be found under the folder titled "graph_test_dir".
 
-There's also a list of optional arguments:
+### Optional arguments:
 
 To change the output path: ```sh -o [FilePath]``` or ```sh --output_path```
 
