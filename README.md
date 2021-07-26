@@ -30,7 +30,9 @@ Several sample graphs can be found under the folder titled "graph_test_dir".
 There's also a list of optional arguments:
 
 To change the output path: ```sh -o [FilePath]``` or ```sh --output_path```
+
 To activate verbose (more output informations) : ```sh  -v``` or ```sh --verbose```
+
 To see the project's version : ```sh --version```
 
 ## References
