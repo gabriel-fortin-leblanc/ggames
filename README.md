@@ -9,6 +9,11 @@ by reducing the problem to a reachability game.
 ## Installation
 The following commands are the current valid ways of installing the program.
 
+#### Using pip
+```sh
+   pip install -i https://test.pypi.org/simple/ ggames
+```
+ 
 #### Windows
    ```sh
    
