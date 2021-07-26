@@ -7,7 +7,7 @@ A cops and robber game is played on an edge periodic (or static) graph
 import logging
 import math, copy
 import functools, itertools
-from reachability_game import get_attractor
+from . import reachability_game
 
 
 
@@ -113,9 +113,9 @@ def is_kcop_win(V, E, tau, k=1):
     logger = logging.getLogger('main.com_robber_game')
     logger.info('"cop_robber_game.is_kcop_win" called.')
 
-    attractor = get_attractor(
-                            *game_graph_to_reachability_game(
-                            *get_game_graph(V, E, tau, k)))
+    attractor = reachability_game.get_attractor(
+            *game_graph_to_reachability_game(
+            *get_game_graph(V, E, tau, k)))
 
     n = len(V)
     starting_classes = dict()
