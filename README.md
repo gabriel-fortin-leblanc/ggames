@@ -9,20 +9,10 @@ by reducing the problem to a reachability game.
 ## Installation
 The following commands are the current valid ways of installing the program.
 
-#### Using pip
+#### [Using pip](https://pip.pypa.io/en/stable/installation/)
 ```sh
-   pip install -i https://test.pypi.org/simple/ ggames
+pip install -i https://test.pypi.org/simple/ ggames
 ```
- 
-#### Windows
-   ```sh
-   
-   ```
-
-#### Linux
-   ```sh
-   
-   ```
 
 The program requires Python 3.?+
 
@@ -39,11 +29,15 @@ Several sample graphs can be found under the folder titled "graph_test_dir".
 
 There's also a list of optional arguments:
 
-## References
+To change the output path: ```sh -o [FilePath]``` or ```sh --output_path```
+To activate verbose (more output informations) : ```sh  -v``` or ```sh --verbose```
+To see the project's version : ```sh --version```
 
+## References
+The algorith is based on *[TODO:AutorName]*'s [paper] *[TODO:PaperURL]*.
 
 ## Contribute
-
+Feel free to ask the permission to contribute by improving the existing algorithms or implement another reachability algorithm to this project!
 
 ## Contact
-If you have any further questions, feel free to send an email to *[email]*
+If you have any further questions, feel free to send an email to *[TODO:email]*
