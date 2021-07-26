@@ -1,11 +1,9 @@
-from ast import parse
-import sys, time, json, argparse
-import multiprocessing as mp
-from itertools import chain
+import sys, argparse, logging
+import json, re, itertools
+from . import cop_robber_game as crg
 
-import cop_robber_game as crg
-import computer
 
+VERSION = '1.0'
 
 PROGRAM_NAME = 'Cop-number computer'
 PROGRAM_DESCRIPTION = \
@@ -13,7 +11,7 @@ PROGRAM_DESCRIPTION = \
 winning graph. The graph can be either static or edge periodic. It proceeds
 by reducing the problem to a reachability game.'''
 PROGRAM_VERSION = \
-'''''' # TODO: To complete
+f'''Version {VERSION} (This is the initial version).'''
 
 ERROR_JSON_MSG = \
 '''The JSon is not well formatted.'''
@@ -24,6 +22,7 @@ ERROR_OPENING_GRAPH_FILE_MSG = \
 '''The file containing the graph cannot be opened. Check if the file exists
 and if the permission of reading is granted.'''
 
+
 def create_parser():
     """
     Create the arguments parser of the program.
@@ -32,20 +31,17 @@ def create_parser():
             prog=PROGRAM_NAME,
             description=PROGRAM_DESCRIPTION)
     
-    parser.add_argument('k', type=int, help="the number of cops in the\
-                        game. (Mandatory)")
-    parser.add_argument('graph_file_path', help="the path to the file\
-                        containing the description of the graph. (Mandatory)")
-    parser.add_argument('--output_path', '-o', help="specify the path to\
-                        the output file containing the presence mapping of\
-                        the k-cop-win graph.")
-    parser.add_argument('--verbose', '-v', action='store_true', help="output \
-                        more information.") # TODO: Needs improvement
-    parser.add_argument('--version', action='store_true', help="show the \
-                        current version of the program.")
-    # All edge periodic graph with the length ?
-    parser.add_argument('--all', '-a', help="compute all snapshots of the \
-                    graph.") # TODO: Needs improvement
+    parser.add_argument('k', type=int, help=
+            'The number of cops in the game.')
+    parser.add_argument('graph_file_path', help=
+            'The path to the file containing the description of the graph.')
+    parser.add_argument('--output_path', '-o', help=
+            'Specify the path to the output file containing the presence '\
+            'mapping of the k-cop-win graph.')
+    parser.add_argument('--verbose', '-v', action='store_true', help=
+            'Output more information.') # TODO: Needs improvement
+    parser.add_argument('--version', action='store_true', help=
+            'Show the current version of the program.')
     return parser
 
 
@@ -55,35 +51,48 @@ def extract_graph(graph_str):
     :param graph_str: A graph in JSon format.
     """
     json_object = json.loads(graph_str)
+    V = json_object['V']; E = list(map(tuple, json_object['E']))
 
     # Validate that the list of edges does not contain inexistent vertices.
-    for i in set(list(chain(*json_object['E']))):
-        if i not in json_object['V']:
+    V_set = set(json_object['V'])
+    for u in itertools.chain(*json_object['E']):
+        if u not in V_set:
             raise ValueError("Unexpected value detected in 'E' variable.")
     
+    # Validate that every edge has a corresponding binary string.
     if 'tau' in graph_str:
-        #Validate that every edge has a corresponding binary string.
-        if len(json_object['E']) != len(json_object['tau']):
-            raise ValueError("Unexpected number of elements in 'tau' variable.")
+        tau = {E[i]: seq for i, seq in enumerate(json_object['tau'])}
+        if len(E) != len(tau):
+            raise ValueError("Unexpected number of elements in 'tau' '\
+                    'variable.")
         
         # Validate that all elements in 'tau' are composed of binary strings.
-        for binary_str in set(json_object['tau']):
-            if not all(x in "01" for x in binary_str):
-                raise ValueError("Unexpected value detected in 'tau' variable.")
-    return json_object['V'], map(tuple, json_object['E'])
+        bin_regex = re.compile('^(0*10*)+$')
+        for binary_str in tau.values():
+            if bin_regex.fullmatch(binary_str) is None:
+                raise ValueError("Unexpected value detected in 'tau' '\
+                        'variable.")
+        return V, E, tau
+    return V, E
 
 
-
-
-def main(args):
+def main():
     parser = create_parser()
-    parsed_args = parser.parse_args(args)
+    parsed_args = parser.parse_args()
     
     if parsed_args.version:
         # If this argument is present, then we show the version and forget
         # the other arguements.
         print(PROGRAM_VERSION)
         exit(0)
+    
+    logger = logging.getLogger('main')
+    if parsed_args.verbose is not None:
+        # Activate the logger.
+        logger.setLevel(logging.INFO)
+        logger_handler = logging.StreamHandler(stream=sys.stdout)
+        logger_handler.setLevel(logging.INFO)
+        logger.addHandler(logger_handler)
     
     if parsed_args.output_path is not None:
         # If an output path is given, it will be used to output the result.
@@ -92,34 +101,29 @@ def main(args):
             output = open(parsed_args.output_path, 'w')
         except OSError as error:
             sys.stderr.write(f'{ERROR_OPENING_OUTPUT_FILE_MSG}\n'\
-                    '{error.strerror}')
+                    f'{error.strerror}')
             exit(error.errno)
     else:
         output = sys.stdout
     
     # Get the graph
+    logger.info('Loading the graph...')
     try:
         file = open(parsed_args.graph_file_path, 'r')
         graph_str = file.read()
         file.close()
+        graph = extract_graph(graph_str)
     except OSError as error:
         sys.stderr.write(f'{ERROR_OPENING_GRAPH_FILE_MSG}\n'\
-                '{error.strerror}')
+                f'{error.strerror}')
         exit(error.errno)
-    try:
-        graph = extract_graph(graph_str)
     except json.JSONDecodeError as error:
         sys.stderr.write(f'{ERROR_JSON_MSG}\n{error.msg}')
         exit(1) # TODO: Find the proper error code for not well formatted JSON
-    
-    if parsed_args.all:
-        computer.compute_all_problems(graph[0], graph[1], parsed_args.all,
-                parsed_args.k, output)
-    else:
-        output.write(str(crg.is_kcop_win(graph[0], graph[1],
-                tau=graph[2] if len(graph) == 3 else None, k=parsed_args.k)))
+    except ValueError as error:
+        sys.stderr.write(str(error))
+    logger.info('Graph loaded.')
 
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])
+    result = crg.is_kcop_win(graph[0], graph[1],
+            tau=graph[2] if len(graph) == 3 else None, k=parsed_args.k)
+    output.write(f'{result}\n')
