@@ -39,7 +39,7 @@ To see the project's version : ```sh --version```
 The algorith is based on *[TODO:AutorName]*'s [paper] *[TODO:PaperURL]*.
 
 ## Contribute
-Feel free to ask the permission to contribute by improving the existing algorithms or implement another reachability algorithm to this project!
+Feel free to ask the permission to contribute by improving the existing algorithms or implement another reachability problem to this project!
 
 ## Contact
-If you have any further questions, feel free to send an email to *[TODO:email]*
+If you have any further questions or want to contribute, feel free to send an email to *[TODO:email]*
