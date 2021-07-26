@@ -9,7 +9,7 @@ by reducing the problem to a reachability game.
 ## Installation
 The following commands are the current valid ways of installing the program.
 
-#### [Using pip](https://pip.pypa.io/en/stable/installation/)
+#### Using [pip](https://pip.pypa.io/en/stable/installation/)
 ```sh
 pip install -i https://test.pypi.org/simple/ ggames
 ```
