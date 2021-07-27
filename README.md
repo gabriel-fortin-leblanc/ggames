@@ -30,6 +30,7 @@ Several sample graphs can be found under the folder titled "graph_test_dir".
 ### Example
 
 ```sh kcop-win 3 Graph.json```
+
 With Graph.json having as content the example graph, the program would display : 
 ```sh
 Loading the graph...
