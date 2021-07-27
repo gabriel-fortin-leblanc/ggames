@@ -27,6 +27,20 @@ The program takes in two arguments: a cop number and a JSON file describing the 
    ```
 Several sample graphs can be found under the folder titled "graph_test_dir".
 
+### Example
+
+```sh kcop-win 3 Graph.json```
+With Graph.json having as content the example graph, the program would display : 
+```sh
+Loading the graph...
+Graph loaded.
+"cop_robber_game.is_kcop_win" called.
+"cop_robber_game.get_game_graph" called.
+"cop_robber_game.game_graph_to_reachability_game" called.
+"reachability_game.get_attractor" called.
+True
+```
+
 ### Optional arguments:
 
 To change the output path: ```sh -o [FilePath]``` or ```sh --output_path```
