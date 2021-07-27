@@ -19,7 +19,7 @@ The following commands are the current valid ways of installing the program.
    
    ```
 
-The program requires Python 3.?+
+The program requires Python 3.9
 
 ## Usage
 The program takes in two arguments: a cop number and a JSON file describing the graph. The file must include a list of vertices ("V"), a list of edges ("E") and, optionally, a list of *[how do you describe the binary sequences?]*, as follows:
