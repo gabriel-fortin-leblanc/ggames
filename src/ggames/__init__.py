@@ -36,7 +36,7 @@ def create_parser():
             help='Specify the path to the output file containing the presence'\
             ' mapping of the k-cop-win graph.')
     parser.add_argument('--verbose', '-v', action='store_true', help=
-            'Output more information.') # TODO: Needs improvement
+            'Output more information.')
     parser.add_argument('--version', action='version', help=
             'Show the current version of the program.',
             version=f'%(prog)s {VERSION}')
@@ -55,21 +55,21 @@ def extract_graph(graph_str):
     V_set = set(json_object['V'])
     for u in itertools.chain(*json_object['E']):
         if u not in V_set:
-            raise ValueError("Unexpected value detected in 'E' variable.")
+            raise ValueError('Unexpected value detected in \'E\' variable.')
     
     # Validate that every edge has a corresponding binary string.
     if 'tau' in graph_str:
         tau = {E[i]: seq for i, seq in enumerate(json_object['tau'])}
         if len(E) != len(tau):
-            raise ValueError("Unexpected number of elements in 'tau' '\
-                    'variable.")
+            raise ValueError('Unexpected number of elements in \'tau\' '\
+                    'variable.')
         
         # Validate that all elements in 'tau' are composed of binary strings.
         bin_regex = re.compile('^(0*10*)+$')
         for binary_str in tau.values():
             if bin_regex.fullmatch(binary_str) is None:
-                raise ValueError("Unexpected value detected in 'tau' '\
-                        'variable.")
+                raise ValueError('Unexpected value detected in \'tau\' '\
+                        'variable.')
         return V, E, tau
     return V, E
 
