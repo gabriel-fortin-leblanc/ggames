@@ -1,3 +1,4 @@
+from typing import final
 import ggames
 import sys, os, io
 import tempfile
@@ -64,30 +65,42 @@ def test_version():
 def test_error_extract_graph():
     try:
         output = io.StringIO()
-        sys.stdout = output
+        sys.stderr = output
         ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON,
                 'error_unexpected_vertex_d_cycle5.json')])
-    except ValueError as error:
-        assert str(error) == 'Unexpected value detected in \'E\' variable.'
-    else:
-        assert False, 'ValueError hadn\'t been thrown.'
-    finally:
-        sys.stdout = sys.__stdout__
-
-    try:
-        ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON,
-                'error_length_tau_d_cycle5.json')])
-    except ValueError as error:
-        assert str(error) == 'Unexpected number of elements in \'tau\' '\
+    except SystemExit as error:
+        assert error.code == 1
+        assert output.getvalue() == 'Unexpected value detected in \'E\' '\
                 'variable.'
     else:
         assert False, 'ValueError hadn\'t been thrown.'
+    finally:
+        sys.stderr = sys.__stderr__
 
     try:
+        output = io.StringIO()
+        sys.stderr = output
         ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON,
-                'error_unexpected_edge_pattern_d_cycle5.json')])
-    except ValueError as error:
-        assert str(error) == 'Unexpected value detected in \'tau\' variable.'
+                'error_length_tau_d_cycle5.json')])
+    except SystemExit as error:
+        assert error.code == 1
+        assert output.getvalue() == 'Unexpected number of elements in \'tau\''\
+                ' variable.'
     else:
         assert False, 'ValueError hadn\'t been thrown.'
+    finally:
+        sys.stderr = sys.__stderr__
 
+    try:
+        output = io.StringIO()
+        sys.stderr = output
+        ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON,
+                'error_unexpected_edge_pattern_d_cycle5.json')])
+    except SystemExit as error:
+        assert error.code == 1
+        assert output.getvalue() == 'Unexpected value detected in \'tau\' '\
+                'variable.'
+    else:
+        assert False, 'ValueError hadn\'t been thrown.'
+    finally:
+        sys.stderr = sys.__stderr__

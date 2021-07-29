@@ -59,10 +59,10 @@ def extract_graph(graph_str):
     
     # Validate that every edge has a corresponding binary string.
     if 'tau' in graph_str:
-        tau = {E[i]: seq for i, seq in enumerate(json_object['tau'])}
-        if len(E) != len(tau):
+        if len(E) != len(json_object['tau']):
             raise ValueError('Unexpected number of elements in \'tau\' '\
                     'variable.')
+        tau = {E[i]: seq for i, seq in enumerate(json_object['tau'])}
         
         # Validate that all elements in 'tau' are composed of binary strings.
         bin_regex = re.compile('^(0*10*)+$')
@@ -79,7 +79,7 @@ def kcop_win(arg_list):
     parsed_args = parser.parse_args(args=arg_list)
     
     logger = logging.getLogger('main')
-    if parsed_args.verbose is not None:
+    if parsed_args.verbose:
         # Activate the logger.
         logger.setLevel(logging.INFO)
         logger_handler = logging.StreamHandler(stream=sys.stdout)
@@ -114,6 +114,7 @@ def kcop_win(arg_list):
         exit(1) # TODO: Find the proper error code for not well formatted JSON
     except ValueError as error:
         sys.stderr.write(str(error))
+        exit(1) # TODO: Find the proper error code for a ValueError
     logger.info('Graph loaded.')
 
     result = crg.is_kcop_win(graph[0], graph[1],
