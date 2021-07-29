@@ -7,7 +7,7 @@ import tempfile
 PATH_TO_GRAPH_JSON = 'tests/tests_graph_json'
 
 
-def test_output_path():
+def test_create_parser():
     try:
         output = io.StringIO()
         sys.stdout = output
@@ -26,8 +26,6 @@ def test_output_path():
         if temp_output is not None:
             temp_output.close()
 
-
-def test_verbose():
     try:
         output = io.StringIO()
         sys.stdout = output
@@ -47,8 +45,6 @@ def test_verbose():
     finally:
         sys.stdout = sys.__stdout__
 
-
-def test_version():
     try:
         output = io.StringIO()
         sys.stdout = output
@@ -60,6 +56,24 @@ def test_version():
         assert False, 'The console scripts didn\'t exit.'
     finally:
         sys.stdout = sys.__stdout__
+
+
+def test_extract_graph():
+    with open(os.path.join(PATH_TO_GRAPH_JSON, 'd_tree.json')) as f:
+        graph = ggames.extract_graph(f.read())
+    assert len(graph) == 3
+    V, E, tau = graph
+    assert V == [1, 2, 3, 4, 5, 6, 7]
+    assert E == [(1, 2), (2, 3), (3, 4), (2, 5), (5, 6), (3, 7)]
+    assert tau == {(1, 2): '10', (2, 3): '01', (3, 4): '001', (2, 5): '010',
+            (5, 6): '1', (3, 7): '001'}
+
+    with open(os.path.join(PATH_TO_GRAPH_JSON, 'path4.json')) as f:
+        graph = ggames.extract_graph(f.read())
+    assert len(graph) == 2
+    V, E = graph
+    assert V == [1, 2, 3, 4, 5]
+    assert E == [(1, 2), (2, 3), (3, 4), (4, 5)]
 
 
 def test_error_extract_graph():
