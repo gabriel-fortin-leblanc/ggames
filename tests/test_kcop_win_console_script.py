@@ -118,3 +118,19 @@ def test_error_extract_graph():
         assert False, 'ValueError hadn\'t been thrown.'
     finally:
         sys.stderr = sys.__stderr__
+
+
+def test_kcop_win():
+    try:
+        output = io.StringIO()
+        sys.stdout = output
+        ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON, 'path4.json')])
+    except SystemExit as error:
+        assert error.code == 0
+        assert output.getvalue() == 'True\n'
+    else:
+        assert False, 'The console script didn\'t exit.'
+    finally:
+        sys.stdout = sys.__stdout__
+    
+    # TODO: To continue.
