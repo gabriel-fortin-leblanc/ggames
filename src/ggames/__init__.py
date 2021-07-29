@@ -1,4 +1,4 @@
-import sys, argparse, logging
+import sys, argparse, logging, errno
 import json, re, itertools
 from . import cop_robber_game as crg
 
@@ -110,11 +110,11 @@ def kcop_win(arg_list):
                 f'{error.strerror}')
         exit(error.errno)
     except json.JSONDecodeError as error:
-        sys.stderr.write(f'{ERROR_JSON_MSG}\n{error.msg}')
-        exit(1) # TODO: Find the proper error code for not well formatted JSON
+        sys.stderr.write(f'{ERROR_JSON_MSG}\n{error}')
+        exit(errno.EINVAL)
     except ValueError as error:
         sys.stderr.write(str(error))
-        exit(1) # TODO: Find the proper error code for a ValueError
+        exit(errno.EINVAL)
     logger.info('Graph loaded.')
 
     result = crg.is_kcop_win(graph[0], graph[1],

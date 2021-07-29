@@ -1,7 +1,7 @@
-from typing import final
 import ggames
 import sys, os, io
 import tempfile
+import errno
 
 
 PATH_TO_GRAPH_JSON = 'tests/tests_graph_json'
@@ -15,8 +15,8 @@ def test_create_parser():
         path_to_temp_output = os.path.join(tempfile.tempdir, temp_output.name)
         ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON, 'd_tree.json'),
                 '--output', path_to_temp_output])
-    except SystemExit as error:
-        assert error.code == 0
+    except SystemExit as ex:
+        assert ex.code == 0
         temp_output.seek(0)
         assert temp_output.readline() == 'True\n'
     else:
@@ -31,8 +31,8 @@ def test_create_parser():
         sys.stdout = output
         ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON, 'd_tree.json'),
                 '--verbose'])
-    except SystemExit as error:
-        assert error.code == 0
+    except SystemExit as ex:
+        assert ex.code == 0
         assert output.getvalue().split('\n') == [
                 'Loading the graph...',
                 'Graph loaded.',
@@ -49,8 +49,8 @@ def test_create_parser():
         output = io.StringIO()
         sys.stdout = output
         ggames.kcop_win(['--version'])
-    except SystemExit as error:
-        assert error.code == 0
+    except SystemExit as ex:
+        assert ex.code == 0
         assert output.getvalue() == f'{ggames.PROGRAM_NAME} {ggames.VERSION}\n'
     else:
         assert False, 'The console scripts didn\'t exit.'
@@ -83,7 +83,7 @@ def test_error_extract_graph():
         ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON,
                 'error_unexpected_vertex_d_cycle5.json')])
     except SystemExit as error:
-        assert error.code == 1
+        assert error.code == errno.EINVAL
         assert output.getvalue() == 'Unexpected value detected in \'E\' '\
                 'variable.'
     else:
@@ -97,7 +97,7 @@ def test_error_extract_graph():
         ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON,
                 'error_length_tau_d_cycle5.json')])
     except SystemExit as error:
-        assert error.code == 1
+        assert error.code == errno.EINVAL
         assert output.getvalue() == 'Unexpected number of elements in \'tau\''\
                 ' variable.'
     else:
@@ -111,7 +111,7 @@ def test_error_extract_graph():
         ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON,
                 'error_unexpected_edge_pattern_d_cycle5.json')])
     except SystemExit as error:
-        assert error.code == 1
+        assert error.code == errno.EINVAL
         assert output.getvalue() == 'Unexpected value detected in \'tau\' '\
                 'variable.'
     else:
@@ -125,12 +125,71 @@ def test_kcop_win():
         output = io.StringIO()
         sys.stdout = output
         ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON, 'path4.json')])
-    except SystemExit as error:
-        assert error.code == 0
+    except SystemExit as ex:
+        assert ex.code == 0
         assert output.getvalue() == 'True\n'
     else:
         assert False, 'The console script didn\'t exit.'
     finally:
         sys.stdout = sys.__stdout__
     
-    # TODO: To continue.
+    try:
+        output = io.StringIO()
+        sys.stdout = output
+        ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON, 'cycle5.json')])
+    except SystemExit as ex:
+        assert ex.code == 0
+        assert output.getvalue() == 'False\n'
+    finally:
+        sys.stdout = sys.__stdout__
+
+    try:
+        output = io.StringIO()
+        sys.stdout = output
+        ggames.kcop_win(['2', os.path.join(PATH_TO_GRAPH_JSON, 'cycle5.json')])
+    except SystemExit as ex:
+        assert ex.code == 0
+        assert output.getvalue() == 'True\n'
+    finally:
+        sys.stdout = sys.__stdout__
+
+
+def test_error_kcop_win():
+    try:
+        output = io.StringIO()
+        sys.stderr = output
+        ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON, 'cycle5.json'),
+                '--output', 'a_wrong_path_to_the_json_dir/output'])
+    except SystemExit as ex:
+        assert ex.code == errno.ENOENT # No such file or directory
+        assert output.getvalue() == 'The output file cannot be opened. '\
+                'Check the permissions of the directory,\n'\
+                'or if the file exists and cannot be overwritten.\n'\
+                'No such file or directory'
+    finally:
+        sys.stderr = sys.__stderr__
+    
+    try:
+        output = io.StringIO()
+        sys.stderr = output
+        ggames.kcop_win(['1', 'a_wrong_path_to_the_json_dir/graph.json'])
+    except SystemExit as ex:
+        assert ex.code == errno.ENOENT # No such file or directory
+        assert output.getvalue() == 'The file containing the graph cannot be '\
+                'opened. Check if the file exists\nand if the permission of '\
+                'reading is granted.\n'\
+                'No such file or directory'
+    finally:
+        sys.stderr = sys.__stderr__
+    
+    try:
+        output = io.StringIO()
+        sys.stderr = output
+        ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON,
+                'error_json_format_d_cycle5.json')])
+    except SystemExit as ex:
+        assert ex.code == errno.EINVAL
+        assert output.getvalue() == 'The JSon is not well formatted.\n'\
+                'Unterminated string starting at: line 3 column 5 (char 35)'
+    finally:
+        sys.stderr = sys.__stderr__
