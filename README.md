@@ -1,10 +1,42 @@
 # GGames
 
 ## About The Project
+<<<<<<< HEAD
 This Python package provides functions to study games on graphs that can be
 either static or time-varying. The project was first created to help students
 with answering questions about the [cop-number](#cops-and-robbers-game) of
 [edge-periodic graph](#time-varying-graphs).
+=======
+This program takes a cop-number problem and decides if it is a k-cop-
+winning graph. The graph can be either static or edge periodic. It proceeds
+by reducing the problem to a reachability game.
+
+## Installation
+The following commands are the current valid ways of installing the program.
+
+#### Windows
+   ```sh
+   
+   ```
+
+#### Linux
+   ```sh
+   
+   ```
+
+The program requires Python 3.9
+
+## Usage
+The program takes in two arguments: a cop number and a JSON file describing the graph. The file must include a list of vertices ("V"), a list of edges ("E") and, optionally, a list of *[how do you describe the binary sequences?]*, as follows:
+   ```sh
+   {
+    "V" : [ 1, 2, 3 ],
+    "E" : [ [1, 2], [2, 3], [3, 1] ],
+    "tau" : [ "0110", "1", "001" ]
+    }
+   ```
+Several sample graphs can be found under the folder titled "graph_test_dir".
+>>>>>>> coverage
 
 ## Primilinary
 The user must have a minimal knowledge of [graph theory](#bondy-murty) and 

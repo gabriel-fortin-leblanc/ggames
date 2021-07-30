@@ -34,12 +34,9 @@ def get_game_graph(V, E, tau=None, k=1):
                     '0' for u in V] for v in V]
     
     # Compute the least common multiple.
-    if len(tau) == 0:
-        time_horizon = 1
-    else:
-        pattern_lengths = list(map(len, tau.values()))
-        time_horizon = functools.reduce(lambda x,y: abs(x*y) // math.gcd(x,y),
-                pattern_lengths)
+    pattern_lengths = list(map(len, tau.values()))
+    time_horizon = functools.reduce(lambda x,y: abs(x*y) // math.gcd(x,y),
+            pattern_lengths)
 
     # Compute the set of vertices of the game graph.
     V_gg = []; A_gg = []
