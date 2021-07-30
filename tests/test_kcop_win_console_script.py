@@ -11,7 +11,7 @@ def test_create_parser():
     try:
         output = io.StringIO()
         sys.stdout = output
-        temp_output = tempfile.NamedTemporaryFile('w+')
+        temp_output = tempfile.NamedTemporaryFile('w+', delete=False)
         path_to_temp_output = os.path.join(tempfile.tempdir, temp_output.name)
         ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON, 'd_tree.json'),
                 '--output', path_to_temp_output])
@@ -24,7 +24,7 @@ def test_create_parser():
     finally:
         sys.stdout = sys.__stdout__
         if temp_output is not None:
-            temp_output.close()
+            os.unlink(temp_output.name)
 
     try:
         output = io.StringIO()
