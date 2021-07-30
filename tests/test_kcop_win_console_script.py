@@ -12,13 +12,15 @@ def test_create_parser():
         output = io.StringIO()
         sys.stdout = output
         temp_output = tempfile.NamedTemporaryFile('w+', delete=False)
+        temp_output.close()
         path_to_temp_output = os.path.join(tempfile.tempdir, temp_output.name)
         ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON, 'd_tree.json'),
                 '--output', path_to_temp_output])
     except SystemExit as ex:
         assert ex.code == 0
-        temp_output.seek(0)
-        assert temp_output.readline() == 'True\n'
+        with open(path_to_temp_output) as temp_file:
+            temp_file.seek(0)
+            assert temp_file.readline() == 'True\n'
     else:
         assert False, 'The console scripts didn\'t exit.'
     finally:
