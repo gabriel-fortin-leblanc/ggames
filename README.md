@@ -1,10 +1,10 @@
 # GGames
 
 ## About The Project
-This Python package provides functions to study games on graphs that can be
-either static or time-varying. The project was first created to help students
-answer questions about the [cop-number](#cops-and-robbers-game) of
-[edge-periodic graph](#time-varying-graphs).
+GGames, short for Graph Games, is a Python package that provides functions to 
+study games on static or time-varying graphs. The project was first created to 
+help students answer questions about the [cop-number](#cops-and-robbers-game)
+of [edge-periodic graph](#time-varying-graphs).
 
 ## Preliminary
 The user must have minimum knowledge of [graph theory](#bondy-murty) and 
