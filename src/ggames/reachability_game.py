@@ -11,7 +11,7 @@ def get_attractor(S0, S1, A, F):
     """
     Compute the attractor set.
     Credit: Dietmar Berwanger in "Graph games with perfect information"
-    This algorithm has been modified to don't use recursions.
+    This algorithm has been modified to not use recursion.
     :param S0: A list of vertices
     :param S1: A list of vertices (must be disjointed of S0)
     :param A: A sub-list (subset) of S0 x S1 U S1 x S0
