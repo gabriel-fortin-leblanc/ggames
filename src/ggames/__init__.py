@@ -1,6 +1,6 @@
 import sys, argparse, logging, errno
 import json, re, itertools
-from . import cop_robber_game as crg
+from . import cops_robbers_game as crg
 
 
 PROGRAM_NAME = 'GGames'

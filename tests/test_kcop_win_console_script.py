@@ -38,9 +38,9 @@ def test_create_parser():
         assert output.getvalue().split('\n') == [
                 'Loading the graph...',
                 'Graph loaded.',
-                '"cop_robber_game.is_kcop_win" called.',
-                '"cop_robber_game.get_game_graph" called.',
-                '"cop_robber_game.game_graph_to_reachability_game" called.',
+                '"cops_robbers_game.is_kcop_win" called.',
+                '"cops_robbers_game.get_game_graph" called.',
+                '"cops_robbers_game.game_graph_to_reachability_game" called.',
                 '"reachability_game.get_attractor" called.',
                 'True',
                 '']

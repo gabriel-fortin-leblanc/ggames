@@ -1,5 +1,5 @@
 """
-A cops and robber game is played on an edge periodic (or static) graph
+A Cops and Robbers game is played on an edge periodic (or static) graph
 (V, E, tau) where tau is the presence mapping of the edges.
 """
 
@@ -13,7 +13,7 @@ from . import reachability_game
 
 def get_game_graph(V, E, tau=None, k=1):
     """
-    Compute the game graph where the "k"-cops and robber game takes place on
+    Compute the game graph where the "k"-cops and robbers game takes place on
     the edge periodic graph (V, E, tau). If "tau" is not specified, then the
     graph is considered to be static.
     :param V: The list of vertices
@@ -21,8 +21,8 @@ def get_game_graph(V, E, tau=None, k=1):
     :param tau: The presence function of the edges in E in dict
     :param k: The number of cops in the game
     """
-    logger = logging.getLogger('main.cop_robber_game')
-    logger.info('"cop_robber_game.get_game_graph" called.')
+    logger = logging.getLogger('main.cops_robbers_game')
+    logger.info('"cops_robbers_game.get_game_graph" called.')
 
     if tau is None: tau = {e: '1' for e in E}
 
@@ -83,7 +83,7 @@ def game_graph_to_reachability_game(V_gg, A_gg):
     :param A_gg: A list of edges of a game graph
     """
     logger = logging.getLogger('main.com_robber_game')
-    logger.info('"cop_robber_game.game_graph_to_reachability_game" called.')
+    logger.info('"cops_robbers_game.game_graph_to_reachability_game" called.')
 
     S0 = []; S1 = []
     A = copy.deepcopy(A_gg)
@@ -108,7 +108,7 @@ def is_kcop_win(V, E, tau=None, k=1):
     :param k: The number of cops that play on the time-varying graph
     """
     logger = logging.getLogger('main.com_robber_game')
-    logger.info('"cop_robber_game.is_kcop_win" called.')
+    logger.info('"cops_robbers_game.is_kcop_win" called.')
 
     attractor = reachability_game.get_attractor(
             *game_graph_to_reachability_game(

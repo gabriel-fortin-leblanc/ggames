@@ -1,4 +1,4 @@
-from ggames.cop_robber_game import *
+from ggames.cops_robbers_game import *
 
 
 # K2
