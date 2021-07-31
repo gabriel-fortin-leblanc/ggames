@@ -110,6 +110,97 @@ To get help on a console script, you can use the *--help* arguments.
 kcop-win --help # prints the help section
 ```
 
+## Documentation
+### Cops_Robbers_Game.py
+#### `get_game_graph(V: list, E: list, tau: dict, k: int): list`
+Computes the game graph where the "k"-cops and robber game takes place on 
+the edge periodic graph (V, E, tau). If "tau" is not specified, then the
+graph is considered to be static. Returns the list of vertices and arcs of
+the game graph.
+
+Parameters | Description
+--------- | ---------
+V | The list of vertices
+E | The list of edges
+tau | The presence function of the edges in E in dict. If the graph is static, defaults to 'None'.
+k | The number of cops in the game
+
+#### `game_graph_to_reachability_game(V_gg: list, A_gg: list): list`
+Computes and returns a reachable game corresponding to the game graph
+G = (V_gg, A_gg).
+Parameters | Description
+--------- | ---------
+V_gg | A list of vertices of a game graph
+A_gg | A list of edges of a game graph
+
+
+#### `is_kcop_win(V: list, E: list, tau: dict, k: int): boolean`
+Computes if the time-varying graph ("V", "E", "tau") is "k"-cop win
+by turning the game into a reachability game. 
+Parameters | Description
+--------- | ---------
+V | A set of vertices 
+E | A set of edges
+tau | A map from E to a set of bit sequences
+k | The number of cops that play on the time-varying graph
+
+
+### Reachability_Game.py
+#### `get_attractor(S0: list, S1: list, A: list, F: list): list`
+Computes the attractor set.
+Parameters | Description
+--------- | ---------
+S0 | A list of vertices
+S1 | A list of vertices (must be disjointed of S0)
+A | A sub-list (subset) of S0&times;S1 &cup; S1&times;S0
+F | A sub-list (subset) of S1 as list.
+
+#### `get_next_winning_moves(current_vertex: int, A: list, attractor: list, player0_move: boolean): list`
+Compute a list of next moves that lead to a winning game for the player 0
+if "player0_move" with respect to the game on the graph with the set of
+arcs "A", its attractor set "attractor" and the vertex "current_vertex"
+the token is on.
+Parameters | Description
+--------- | ---------
+current_vertex | A vertex
+A | A list of arcs
+attractor | A list representing the attractor set.
+player0_move | A flag meaning that it's Player 0's turn to play.`
+
+## References
+<p id="bondy-murty">[1] Bondy, J. A. & Murty, U. S. R. (1976). Graph Theory
+With Applications. North-Holland</p>
+<p id="casteigts">[2] Casteigts, Arnaud. (2018). A Journey Through Dynamic
+Networks (with Excursions). habilitation à diriger des recherches, Université
+de Bordeaux.</p>
+<p id="berwanger">[3] Berwanger, Dietmar. (2013). Graph games with perfect
+information. arXiv:1407.1647.</p>
+<p id="bonato-nowakowski">[4] Bonato, Antony & Nowakowski, Richard J. (2011).
+The Game of Cops and Robbers on Graphs. American Mathematical Society.<p>
+<p id="erlebach-spooner">[5] Erlebach, Thomas & Spooner, Jakob T. (2019). A
+Game of Cops and Robbers on Graphs with Periodic Edge-Connectivity.
+arXiv:1908.06828<p>
+<p id="quilliot">[6] Quilliot, Alain. (1978). Jeux et pointes fixes sur les
+graphes. PhD thesis, University of Paris VI.<p>
+<p id="nowakowski-winkler">[7] Nowakowski, Richard & Winkler, Peter. (1983).
+Vertex-to-vertex pursuit in a graph. Discrete Mathematics.<p>
+<p id="sipser">[8] Sipser, Michael. (2013). Introduction to the Theory of
+Computation, Third Edition. Cengage Learning.</p>
+
+## Contribute
+Feel free to contribute by adding new modules for other graph games, creating more
+efficient algorithms for some classes of graphs, or even improving the
+existing algorithms! For more information on how to contribute to this project,
+read [How to Contribute](#TODO).
+
+## Contact
+If you have any further questions or want to contribute, feel free to send an
+email to [Gabriel](https://github.com/gfl-math-stat-info).
+current_vertex | A vertex
+A | A list of arcs
+attractor | A list representing the attractor set.
+player0_move | A flag meaning that it's Player 0's turn to play.`
+
 ## References
 <p id="bondy-murty">[1] Bondy, J. A. & Murty, U. S. R. (1976). Graph Theory
 With Applications. North-Holland</p>
