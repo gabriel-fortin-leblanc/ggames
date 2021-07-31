@@ -1,6 +1,6 @@
 # How to Contribute
 <!-- TODO: What to read first README, ... -->
-You should first read the [code of conduct](https://github.com/gfl-math-stat-info/ggames/edit/main/README.md) and the [read me](https://github.com/gfl-math-stat-info/ggames/edit/main/README.md)
+You should first read the [code of conduct](https://github.com/gfl-math-stat-info/ggames/edit/main/README.md) and the [read me](https://github.com/gfl-math-stat-info/ggames/edit/main/README.md).
 
 ## The project
 <!-- TODO: A brief description of the project. Refer to README for mor info. -->
