@@ -111,7 +111,7 @@ kcop-win --help # prints the help section
 ```
 
 ## Documentation
-### Cops_Robbers_Game.py
+### `cops_robbers_game`
 #### `get_game_graph(V: list, E: list, tau: dict, k: int): list`
 Computes the game graph where the "k"-cops and robber game takes place on 
 the edge periodic graph (V, E, tau). If "tau" is not specified, then the
@@ -145,7 +145,7 @@ tau | A map from E to a set of bit sequences
 k | The number of cops that play on the time-varying graph
 
 
-### Reachability_Game.py
+### `reachability_game`
 #### `get_attractor(S0: list, S1: list, A: list, F: list): list`
 Computes the attractor set.
 Parameters | Description
