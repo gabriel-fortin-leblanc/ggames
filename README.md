@@ -203,23 +203,24 @@ player0_move | A flag meaning that it's Player 0's turn to play.`
 
 ## References
 <p id="bondy-murty">[1] Bondy, J. A. & Murty, U. S. R. (1976). Graph Theory
-With Applications. North-Holland</p>
-<p id="casteigts">[2] Casteigts, Arnaud. (2018). A Journey Through Dynamic
-Networks (with Excursions). habilitation à diriger des recherches, Université
-de Bordeaux.</p>
-<p id="berwanger">[3] Berwanger, Dietmar. (2013). Graph games with perfect
-information. arXiv:1407.1647.</p>
-<p id="bonato-nowakowski">[4] Bonato, Antony & Nowakowski, Richard J. (2011).
-The Game of Cops and Robbers on Graphs. American Mathematical Society.<p>
-<p id="erlebach-spooner">[5] Erlebach, Thomas & Spooner, Jakob T. (2019). A
+With Applications. North-Holland.</p>
+<p id="casteigts">[2] Casteigts, A. (2018). A Journey Through Dynamic
+Networks (with Excursions). Université de Bordeaux.</p>
+<p id="berwanger">[3] Berwanger, D. (2013). Graph games with perfect
+information [Lecture notes]. ENS Cachan, Cachan.</p>
+<p id="bonato-nowakowski">[4] Bonato, A. & Nowakowski, R. J. (2011).
+The Game of Cops and Robbers on Graphs. American Mathematical Society.
+http://dx.doi.org/10.1090/stml/061.<p>
+<p id="erlebach-spooner">[5] Erlebach, T & Spooner, J. T. (2019). A
 Game of Cops and Robbers on Graphs with Periodic Edge-Connectivity.
 arXiv:1908.06828<p>
-<p id="quilliot">[6] Quilliot, Alain. (1978). Jeux et pointes fixes sur les
+<p id="quilliot">[6] Quilliot, A. (1978). Jeux et pointes fixes sur les
 graphes. PhD thesis, University of Paris VI.<p>
-<p id="nowakowski-winkler">[7] Nowakowski, Richard & Winkler, Peter. (1983).
-Vertex-to-vertex pursuit in a graph. Discrete Mathematics.<p>
-<p id="sipser">[8] Sipser, Michael. (2013). Introduction to the Theory of
-Computation, Third Edition. Cengage Learning.</p>
+<p id="nowakowski-winkler">[7] Nowakowski, R. & Winkler, P. (1983).
+Vertex-to-vertex pursuit in a graph. Discrete Mathematics, 32(2-3), 235-239.
+https://doi.org/10.1016/0012-365X(83)90160-7.<p>
+<p id="sipser">[8] Sipser, M. (2013). Introduction to the Theory of
+Computation (3rd ed.). Cengage Learning.</p>
 
 ## Contribute
 Feel free to contribute by adding new modules for other graph games, creating more
