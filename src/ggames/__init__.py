@@ -20,30 +20,7 @@ ERROR_OPENING_GRAPH_FILE_MSG = \
 and if the permission of reading is granted.'''
 
 
-def create_parser():
-    """
-    Create the arguments parser of the program.
-    """
-    parser = argparse.ArgumentParser(
-            prog=PROGRAM_NAME,
-            description=PROGRAM_DESCRIPTION)
-    
-    parser.add_argument('k', type=int, help=
-            'The number of cops in the game.')
-    parser.add_argument('graph_file_path', help=
-            'The path to the file containing the description of the graph.')
-    parser.add_argument('--output_path', '-o',
-            help='Specify the path to the output file containing the presence'\
-            ' mapping of the k-cop-win graph.')
-    parser.add_argument('--verbose', '-v', action='store_true', help=
-            'Output more information.')
-    parser.add_argument('--version', action='version', help=
-            'Show the current version of the program.',
-            version=f'%(prog)s {VERSION}')
-    return parser
-
-
-def extract_graph(graph_str):
+def _extract_graph(graph_str):
     """
     Extract the graph from a string.
     :param graph_str: A graph in JSon format.
@@ -75,7 +52,21 @@ def extract_graph(graph_str):
 
 
 def kcop_win(arg_list):
-    parser = create_parser()
+    parser = argparse.ArgumentParser(
+            prog=PROGRAM_NAME,
+            description=PROGRAM_DESCRIPTION)
+    parser.add_argument('k', type=int, help=
+            'The number of cops in the game.')
+    parser.add_argument('graph_file_path', help=
+            'The path to the file containing the description of the graph.')
+    parser.add_argument('--output_path', '-o',
+            help='Specify the path to the output file containing the presence'\
+            ' mapping of the k-cop-win graph.')
+    parser.add_argument('--verbose', '-v', action='store_true', help=
+            'Output more information.')
+    parser.add_argument('--version', action='version', help=
+            'Show the current version of the program.',
+            version=f'%(prog)s {VERSION}')
     parsed_args = parser.parse_args(args=arg_list)
     
     logger = logging.getLogger('main')
@@ -104,7 +95,7 @@ def kcop_win(arg_list):
         file = open(parsed_args.graph_file_path, 'r')
         graph_str = file.read()
         file.close()
-        graph = extract_graph(graph_str)
+        graph = _extract_graph(graph_str)
     except OSError as error:
         sys.stderr.write(f'{ERROR_OPENING_GRAPH_FILE_MSG}\n'\
                 f'{error.strerror}')

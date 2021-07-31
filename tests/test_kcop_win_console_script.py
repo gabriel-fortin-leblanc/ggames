@@ -7,62 +7,9 @@ import errno
 PATH_TO_GRAPH_JSON = 'tests/tests_graph_json'
 
 
-def test_create_parser():
-    try:
-        output = io.StringIO()
-        sys.stdout = output
-        temp_output = tempfile.NamedTemporaryFile('w+', delete=False)
-        temp_output.close()
-        path_to_temp_output = os.path.join(tempfile.tempdir, temp_output.name)
-        ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON, 'd_tree.json'),
-                '--output', path_to_temp_output])
-    except SystemExit as ex:
-        assert ex.code == 0
-        with open(path_to_temp_output) as temp_file:
-            temp_file.seek(0)
-            assert temp_file.readline() == 'True\n'
-    else:
-        assert False, 'The console scripts didn\'t exit.'
-    finally:
-        sys.stdout = sys.__stdout__
-        if temp_output is not None:
-            os.unlink(temp_output.name)
-
-    try:
-        output = io.StringIO()
-        sys.stdout = output
-        ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON, 'd_tree.json'),
-                '--verbose'])
-    except SystemExit as ex:
-        assert ex.code == 0
-        assert output.getvalue().split('\n') == [
-                'Loading the graph...',
-                'Graph loaded.',
-                '"cops_robbers_game.is_kcop_win" called.',
-                '"cops_robbers_game.get_game_graph" called.',
-                '"cops_robbers_game.game_graph_to_reachability_game" called.',
-                '"reachability_game.get_attractor" called.',
-                'True',
-                '']
-    finally:
-        sys.stdout = sys.__stdout__
-
-    try:
-        output = io.StringIO()
-        sys.stdout = output
-        ggames.kcop_win(['--version'])
-    except SystemExit as ex:
-        assert ex.code == 0
-        assert output.getvalue() == f'{ggames.PROGRAM_NAME} {ggames.VERSION}\n'
-    else:
-        assert False, 'The console scripts didn\'t exit.'
-    finally:
-        sys.stdout = sys.__stdout__
-
-
 def test_extract_graph():
     with open(os.path.join(PATH_TO_GRAPH_JSON, 'd_tree.json')) as f:
-        graph = ggames.extract_graph(f.read())
+        graph = ggames._extract_graph(f.read())
     assert len(graph) == 3
     V, E, tau = graph
     assert V == [1, 2, 3, 4, 5, 6, 7]
@@ -71,7 +18,7 @@ def test_extract_graph():
             (5, 6): '1', (3, 7): '001'}
 
     with open(os.path.join(PATH_TO_GRAPH_JSON, 'path4.json')) as f:
-        graph = ggames.extract_graph(f.read())
+        graph = ggames._extract_graph(f.read())
     assert len(graph) == 2
     V, E = graph
     assert V == [1, 2, 3, 4, 5]
@@ -123,6 +70,57 @@ def test_error_extract_graph():
 
 
 def test_kcop_win():
+    try:
+        output = io.StringIO()
+        sys.stdout = output
+        temp_output = tempfile.NamedTemporaryFile('w+', delete=False)
+        temp_output.close()
+        path_to_temp_output = os.path.join(tempfile.tempdir, temp_output.name)
+        ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON, 'd_tree.json'),
+                '--output', path_to_temp_output])
+    except SystemExit as ex:
+        assert ex.code == 0
+        with open(path_to_temp_output) as temp_file:
+            temp_file.seek(0)
+            assert temp_file.readline() == 'True\n'
+    else:
+        assert False, 'The console scripts didn\'t exit.'
+    finally:
+        sys.stdout = sys.__stdout__
+        if temp_output is not None:
+            os.unlink(temp_output.name)
+
+    try:
+        output = io.StringIO()
+        sys.stdout = output
+        ggames.kcop_win(['1', os.path.join(PATH_TO_GRAPH_JSON, 'd_tree.json'),
+                '--verbose'])
+    except SystemExit as ex:
+        assert ex.code == 0
+        assert output.getvalue().split('\n') == [
+                'Loading the graph...',
+                'Graph loaded.',
+                '"cops_robbers_game.is_kcop_win" called.',
+                '"cops_robbers_game.get_game_graph" called.',
+                '"cops_robbers_game.game_graph_to_reachability_game" called.',
+                '"reachability_game.get_attractor" called.',
+                'True',
+                '']
+    finally:
+        sys.stdout = sys.__stdout__
+
+    try:
+        output = io.StringIO()
+        sys.stdout = output
+        ggames.kcop_win(['--version'])
+    except SystemExit as ex:
+        assert ex.code == 0
+        assert output.getvalue() == f'{ggames.PROGRAM_NAME} {ggames.VERSION}\n'
+    else:
+        assert False, 'The console scripts didn\'t exit.'
+    finally:
+        sys.stdout = sys.__stdout__
+
     try:
         output = io.StringIO()
         sys.stdout = output
