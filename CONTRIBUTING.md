@@ -1,5 +1,7 @@
 # How to Contribute
-Before to contribute, you should first read the [code of conduct](https://github.com/gfl-math-stat-info/ggames/edit/main/README.md) and the [README file](https://github.com/gfl-math-stat-info/ggames/edit/main/README.md).
+Before to contribute, you should first read the
+[code of conduct](https://github.com/gfl-math-stat-info/ggames/blob/main/CODE_OF_CONDUCT.md)
+and the [README file](https://github.com/gfl-math-stat-info/ggames/blob/main/README.md).
 
 ## The project
 GGames, short for Graphs Games, is a Python package that provides functions to 
@@ -9,6 +11,7 @@ study games on static or time-varying graphs.
 The structure of the project is quite simple. At its root, you have the code of conduct,
 the license, the README and multiple configuration files used to test, publish and more
 the package.
+```
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
 ├── LICENSE
@@ -31,36 +34,55 @@ the package.
 │       │
 │       .
 └── tox.ini
+```
 There is also two directories: "src" and "tests". For more information about this
-file structure, you can read the [tutorial on Pypi](#https://packaging.python.org/tutorials/packaging-projects/).
+file structure, you can read the [tutorial on Pypi](https://packaging.python.org/tutorials/packaging-projects/).
 
 ### The workflow
-<!-- TODO: Speak about GitFlow, briefly how it works, (Refer to a good tutorial
-about GitFlow in English and French) and Tox (refer to tox installation page).
-GitHub Actions will be also added very soon. I keep you in touch about that. -->
-<!-- TODO: How to commit, not to often, not to rarely. Nice messages in commits.
-Don't be scared to use --amend. Push with Pull requests. -->
+On your machine, you can manage your workflow like you want, but our project
+hold a "tox" configuration file that allows you to use [Tox](https://tox.readthedocs.io/en/latest/).
+Tox is an small an easy-to-use tool to execute multiple commands on a project.
+With the "tox.ini", you can quickly test your code and print a report about
+the coverage of your tests. Keep in mind that your tests will be run
+with the version of your Python interpreter, but will be run with other
+versions on the remote.
 
-We suggest these two tutorials to get started : GitFlow [EN](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)/[FR](https://www.atlassian.com/fr/git/tutorials/comparing-workflows/gitflow-workflow) and [Tox](https://tox.readthedocs.io/en/latest/).
-Try to [commit](https://www.atlassian.com/git/tutorials/saving-changes/git-commit) when you have completed a "task" in the project : a complete, not necessary big, part of the project that can be identified as an improvement. Try to specify what that improvement is and describe what you did to accomplish it in the git commit message. Push using [pull requests](https://github.com/gfl-math-stat-info/ggames/pulls).
+The workflow GitFlow is used to keep an understanding method of creation of
+branches. For more information about GitFlow, you can read the
+[tutorial on Atlassian](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
+
+After being reading familiar with this project, a good way to start contributing is
+to take a look to the known [issues](https://github.com/gfl-math-stat-info/ggames/issues)
+and resolve one. If there is no interesting one, you can create a new feature.
+
+When you've completed a new feature or resolved a issue, do a
+[pull request](https://github.com/gfl-math-stat-info/ggames/pulls).
 
 ### Add a new feature
-<!-- TODO: Explain: Coverage 100% by the new tests. If new module,
-make sure it cannot be put inside another one. If one becomes too
-big, speak with others to split the module into smaller ones.
-NEVER delete function, but rather add deprecated warning -->
-To add a new feature, first make sure if it could fit inside an already existing module or not (you can also ask a maintainer if you're unsure). If you think it should include an existing module, but it would make it too "bloaty", don't hesitate to ask to split the module into smaller ones (that we could all put under a same directory).
-Do not delete functions : instead add a deprecated warning on it.
-Because this project is a community one, any decisions made by a contributor might have significant impact on other users/contributors, so make sure to talk with a maintainer before to take a decision that might have big repercussions on the project.
+When you add a new feature, make sure to add to the good module. If the feature is a new module,
+then be sure it can't fit into an existing one. If you think it should include into an existing
+module, but it would make it too "bloaty", ask to split the module into smaller ones
+(that we could all put under a same directory).
+
+Never functions : instead add a deprecated warning on it. A deleted function may imply bugs into
+the users' programs.
+
+This project is a community one, any decisions made by a contributor might have
+significant impact on other users/contributors, so make sure to
+[talk with a maintainer](https://github.com/gfl-math-stat-info/ggames/discussions)
+before to take a decision that might have big repercussions on the project.
 
 ### The code quality
-<!-- TODO: PEP8, list the conventions already used here and the
-importance to respect them. Use English everywhere since people speak different
-languages. -->
 Try to respect the code quality's guideline to ensure cohesion throughout the project.
-The code standard this project is following is [PEP8](https://www.python.org/dev/peps/pep-0008/). Also use the single quotes (') instead of double quotes (") whenever applicable. Always write in english, please.
+The code standard this project is following is
+[PEP8](https://www.python.org/dev/peps/pep-0008/). It exists other unofficial guidelines
+used in this project, like using the single quotes (') instead of double quotes (") for strings.
+Please respect them.
+
+We come from different nations and don't speak the same language. Since English is the most spoken
+one, we use it everywhere in the project.
 
 ## How to report an issue
-<!-- TODO: Describe how report issue. Explain that it's quick to do
-and how it's important. Always check if it's a known issue. -->
-List the issue under the appropriate tab and describe the impact on the project and how to reproduce it (if able). Try to evaluate if it's a quick fix or not and verify that's not a known issue.
+Reporting new issues when one's discovered is important to improve this project. Before reporting
+one, verify that's not known. List the issue under the appropriate tab and describe the impact
+on the project and how to reproduce it. Try to evaluate if it's a quick fix.
