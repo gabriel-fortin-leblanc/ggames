@@ -83,6 +83,7 @@ We come from different nations and don't speak the same language. Since English 
 one, we use it everywhere in the project.
 
 ## How to report an issue
-Reporting new issues when one's discovered is important to improve this project. Before reporting
+Reporting new [issues](https://github.com/gfl-math-stat-info/ggames/issues)
+when one's discovered is important to improve this project. Before reporting
 one, verify that's not known. List the issue under the appropriate tab and describe the impact
 on the project and how to reproduce it. Try to evaluate if it's a quick fix.
