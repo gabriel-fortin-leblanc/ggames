@@ -169,40 +169,6 @@ player0_move | A flag meaning that it's Player 0's turn to play.`
 
 ## References
 <p id="bondy-murty">[1] Bondy, J. A. & Murty, U. S. R. (1976). Graph Theory
-With Applications. North-Holland</p>
-<p id="casteigts">[2] Casteigts, Arnaud. (2018). A Journey Through Dynamic
-Networks (with Excursions). habilitation à diriger des recherches, Université
-de Bordeaux.</p>
-<p id="berwanger">[3] Berwanger, Dietmar. (2013). Graph games with perfect
-information. arXiv:1407.1647.</p>
-<p id="bonato-nowakowski">[4] Bonato, Antony & Nowakowski, Richard J. (2011).
-The Game of Cops and Robbers on Graphs. American Mathematical Society.<p>
-<p id="erlebach-spooner">[5] Erlebach, Thomas & Spooner, Jakob T. (2019). A
-Game of Cops and Robbers on Graphs with Periodic Edge-Connectivity.
-arXiv:1908.06828<p>
-<p id="quilliot">[6] Quilliot, Alain. (1978). Jeux et pointes fixes sur les
-graphes. PhD thesis, University of Paris VI.<p>
-<p id="nowakowski-winkler">[7] Nowakowski, Richard & Winkler, Peter. (1983).
-Vertex-to-vertex pursuit in a graph. Discrete Mathematics.<p>
-<p id="sipser">[8] Sipser, Michael. (2013). Introduction to the Theory of
-Computation, Third Edition. Cengage Learning.</p>
-
-## Contribute
-Feel free to contribute by adding new modules for other graph games, creating more
-efficient algorithms for some classes of graphs, or even improving the
-existing algorithms! For more information on how to contribute to this project,
-read [How to Contribute](https://github.com/gfl-math-stat-info/ggames/blob/main/CONTRIBUTING.md).
-
-## Contact
-If you have any further questions or want to contribute, feel free to send an
-email to [Gabriel](https://github.com/gfl-math-stat-info).
-current_vertex | A vertex
-A | A list of arcs
-attractor | A list representing the attractor set.
-player0_move | A flag meaning that it's Player 0's turn to play.`
-
-## References
-<p id="bondy-murty">[1] Bondy, J. A. & Murty, U. S. R. (1976). Graph Theory
 With Applications. North-Holland.</p>
 <p id="casteigts">[2] Casteigts, A. (2018). A Journey Through Dynamic
 Networks (with Excursions). Université de Bordeaux.</p>
