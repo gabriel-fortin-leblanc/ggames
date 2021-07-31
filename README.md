@@ -87,7 +87,7 @@ next_moves = rg.get_next_winning_moves((3, 2, True, 0), A, attractor,
       player0_move=False)
 print(next_moves) # prints []. The robber will lose in any case.
 ```
-To get more information, see the [documentation](#TODO).
+To get more information, see the [documentation](#documentation).
 
 Also, by having a static of an edge-periodic graph into
 [JSON](https://www.json.org/json-en.html) format, a console script can 
@@ -191,7 +191,7 @@ Computation, Third Edition. Cengage Learning.</p>
 Feel free to contribute by adding new modules for other graph games, creating more
 efficient algorithms for some classes of graphs, or even improving the
 existing algorithms! For more information on how to contribute to this project,
-read [How to Contribute](#TODO).
+read [How to Contribute](https://github.com/gfl-math-stat-info/ggames/blob/main/CONTRIBUTING.md).
 
 ## Contact
 If you have any further questions or want to contribute, feel free to send an
