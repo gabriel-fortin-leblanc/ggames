@@ -3,7 +3,7 @@
 ## About The Project
 GGames, short for Graph Games, is a Python package that provides functions to 
 study games on static or time-varying graphs. The project was first created to 
-help students answer questions about the [cop-number](#cops-and-robbers-game)
+help students to answer questions about the [cop-number](#cops-and-robbers-game)
 of [edge-periodic graph](#time-varying-graphs).
 
 ## Preliminary
@@ -45,7 +45,7 @@ reachability game has been written by [Berwanger](#berwanger).
 You can easily install the package via
 [pip](https://pip.pypa.io/en/stable/installation/) with the following command:
 ```sh
-pip install -i https://test.pypi.org/simple/ ggames
+pip install ggames
 ```
 or you can download the
 [sources](https://github.com/gfl-math-stat-info/ggames).
