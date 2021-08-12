@@ -65,39 +65,56 @@ class Edge:
                self.destination == e.destination and \
                self.value == e.value
 
+
 class Graph:
     """
     The abstract data type graph.
     """
 
     def vertices() -> list[Vertex]:
+        """Return a list of the vertices of the graph."""
         raise NotImplemented()
 
     def edges() -> list[Edge]:
+        """Return a list of edges of the graph."""
         raise NotImplemented()
 
     def vertex_count() -> int:
+        """Return the number of vertices the graph contains."""
         raise NotImplemented()
 
     def edge_count() -> int:
+        """Return the number of edges the graph contains."""
         raise NotImplemented()
 
     def degree(v: Vertex), out=True) -> int:
+        """Return the degree of the vertex v."""
         raise NotImplemented()
 
-    def incident_edges(v: Vertex, out=True) -> int:
+    def incident_edges(v: Vertex, out=True) -> list[Edge]:
+        """Return a list of the incident edges of the vertex v."""
         raise NotImplemented()
 
     def insert_vertex(v: Vertex) -> None:
+        """Insert the vertex v in the graph."""
         raise NotImplemented()
 
     def insert_edge(u: Vertex, v: Vertex) -> None:
+        """
+        Insert the edge (u, v) in the graph. If a vertex doesn't exist in
+        the graph, it will be added.
+        """
         raise NotImplemented()
 
     def remove_vertex(v: Vertex) -> None:
+        """
+        Remove the vertex v from the graph. Every incident edge will be also
+        deleted.
+        """
         raise NotImplemented()
 
     def remove_edge(e: Edge) -> None:
+        """Remove the edge e from the graph."""
         raise NotImplemented()
 
 
