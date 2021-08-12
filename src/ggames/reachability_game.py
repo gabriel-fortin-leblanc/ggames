@@ -5,6 +5,37 @@ of elements of S_0 U S_1.
 """
 
 import logging
+from graph import Vertex, Graph
+from typing import Type, Any
+
+
+class ReachabilityGame:
+
+    __slots__ = ['digraph', 'vertices0', 'vertices1', 'finals', '_attractor']
+
+    def __init__(self, digraph: Any, vertices0: set, vertices1: set,
+                 finals: set) -> None:
+        pass
+
+    @property
+    def attractor(self):
+        # TODO: The documentation about this property should be placed here.
+        pass
+
+    @attractor.getter
+    def attrator(self):
+        if self._attractor is None:
+            self._attractor = self._compute_attractor()
+        return self._attractor
+
+    def who_wins(self) -> bool:
+        pass
+
+    def next_winning_moves(v: Any) -> list:
+        pass
+
+    def _compute_attractor(self) -> set:
+        pass
 
 
 def get_attractor(S0, S1, A, F):
