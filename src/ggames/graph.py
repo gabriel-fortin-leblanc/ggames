@@ -2,6 +2,7 @@
 This module provides a interface for graphs that is used in this package.
 """
 from typing import Union, Hashable, Optional, Any, NoReturn, Tuple, List, Set
+from __future__ import annotations
 
 
 class Vertex:
@@ -105,7 +106,7 @@ class Edge:
         otherwise the last attribute is skipped.
         """
         return f'Edge(origin={self.origin}, destination={self.destination}' +\
-            (f' ,{self.value})' if value is not None else ')')
+            (f' ,{self.value})' if self.value is not None else ')')
 
     def __eq__(self, e: Edge) -> bool:
         """
@@ -257,8 +258,7 @@ class AdjacencyMapGraph(Graph):
         :returns: A list of the edges of the graph.
         :rtype: list of :class:`Edge`
         """
-        return [{e for e in edge_dict.values() \
-                 for edge_dict in self._adjacency_map.values()}]
+        return [{e for edge_dict in self._adjacency_map.values() for e in edge_dict.values()}]
 
     def vertex_count(self) -> int:
         """
@@ -362,4 +362,3 @@ class AdjacencyMapGraph(Graph):
             raise ValueError(f'The edge {e} is not part of the graph.')
         del self._adjacency_map[e.origin][e.destination]
         del self._adjacency_map[e.destination][e.origin]
-
