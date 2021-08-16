@@ -178,6 +178,11 @@ class Graph:
         """
         raise NotImplemented()
 
+    def has_edge(self, e: Edge) -> bool:
+        """
+        Returns if the edge ``e`` is in the graph.
+        """
+
     def get_edge(self, u: Vertex, v: Vertex) -> Edge:
         """
         Return the edge composed of the origin u to the destination v if it's
@@ -199,27 +204,28 @@ class Graph:
         """
         raise NotImplemented()
 
-    def insert_vertex(self, v: Vertex) -> NoReturn:
+    def insert_vertex(self, v: Vertex) -> bool:
         """
         Inserts the vertex v in the graph.
         """
         raise NotImplemented()
 
-    def insert_edge(self, u: Vertex, v: Vertex) -> NoReturn:
+    def insert_edge(self, u: Vertex, v: Vertex,
+                    value: Optional(Any)) -> bool:
         """
         Inserts the edge (u, v) in the graph. If a vertex doesn't exist in
         the graph, it will be added.
         """
         raise NotImplemented()
 
-    def remove_vertex(self, v: Vertex) -> NoReturn:
+    def remove_vertex(self, v: Vertex) -> bool:
         """
         Removes the vertex v from the graph. Every incident edge will be also
         deleted.
         """
         raise NotImplemented()
 
-    def remove_edge(self, e: Edge) -> NoReturn:
+    def remove_edge(self, e: Edge) -> bool:
         """Remove the edge e from the graph."""
         raise NotImplemented()
 
@@ -258,7 +264,8 @@ class AdjacencyMapGraph(Graph):
         :returns: A list of the edges of the graph.
         :rtype: list of :class:`Edge`
         """
-        return [{e for edge_dict in self._adjacency_map.values() for e in edge_dict.values()}]
+        return [{e for edge_dict in self._adjacency_map.values() \
+                for e in edge_dict.values()}]
 
     def vertex_count(self) -> int:
         """
@@ -280,11 +287,26 @@ class AdjacencyMapGraph(Graph):
         """
         return self._count_edge
 
+    def has_edge(self, e: Edge) -> bool:
+        """
+        Returns if the edge ``e`` is in the graph. The operation is performed
+        in O(1) expected.
+
+        :returns: A boolean meaning if the edge ``e`` is in the graph.
+        :rtype: bool
+        """
+        adj_vertices = self._adjacency_map[e.origin]
+        if adj_vertices is None:
+            return False
+        return adj_vertices[e.destination] is not None
+
     def get_edge(self, u: Vertex, v: Vertex) -> Edge:
         """
         Returns the edge composed of the vertices ``u`` and ``v`` if it's
-        in the graph. This operation is performed in O(1) expected.
+        in the graph, otherwise None is returned. This operation is performed
+        in O(1) expected.
 
+        
         :param u: A vertex contains in the edge requested.
         :type u: :class:`Vertex`.
         :param v: A vertex contains in the edge requested.
@@ -294,11 +316,12 @@ class AdjacencyMapGraph(Graph):
         """
         return self._adjacency_map[u][v]
 
-    def degree(self, v: Vertex, out=True) -> int:
+    def degree(self, v: Vertex, out=False) -> int:
         """
         Returns the degree of the vertex ``v``. If ``out`` is True, then
         the number of out edges is returned, the number of every incident
-        edges is returned otherwise.
+        edges is returned otherwise. The operation is performed in O(d_v) where
+        d_v is the degree of the vertex ``v``.
 
         :param v: The vertex ``v`` for the one the degree is requested.
         :type v: :class:`Vertex`
@@ -314,11 +337,16 @@ class AdjacencyMapGraph(Graph):
         else:
             return len(self._adjacency_map[v])
 
-    def incident_edges(self, v: Vertex, out=True) -> list[Edge]:
+    def incident_edges(self, v: Vertex, out=False) -> list[Edge]:
         """
-        Returns a list of the incident edges of the vertex ``v``.
+        Returns a list of the incident edges of the vertex ``v``. This
+        operation is performed in O(d_v) where d_v is the degree of ``v``.
 
-        
+        :param v: The vertex whose incident edges are requested.
+        :type v: Vertex
+        :param out: A flag meaning if only the out incident edges are
+                    requested.
+        :returns: list of :class:`Edge`
         """
         if out:
             return [e for e in self._adjacency_map[v].values()
@@ -326,36 +354,77 @@ class AdjacencyMapGraph(Graph):
         else:
             return list(self._adjacency_map[v].values())
 
-    def insert_vertex(self, v: Vertex) -> NoReturn:
-        """Insert the vertex v in the graph."""
-        self._adjacency_map[v] = dict()
-
-    def insert_edge(self, u: Vertex, v: Vertex) -> NoReturn:
+    def insert_vertex(self, v: Vertex) -> bool:
         """
-        Insert the edge (u, v) in the graph. If a vertex doesn't exist in
-        the graph, it will be added.
+        Inserts the vertex ``v`` in the graph. This operation is performed in
+        O(1) expected.
+
+        :param v: The new vertex to add to the graph.
+        :type v: Vertex
+        :returns: A boolean meaning if the operation is a succeed. The vertex
+                  could already been in the graph.
+        :type: bool
+        """
+        if v in self._adjacency_map:
+            return False
+        self._adjacency_map[v] = dict()
+        return True
+
+    def insert_edge(self, u: Vertex, v: Vertex,
+                    value: Optional(Any)) -> bool:
+        """
+        Inserts the edge (u, v) in the graph. If a vertex doesn't exist in
+        the graph, it will be added. This operation is performed in O(1)
+        expected.
+
+        :param u: The vertex origin of the edge.
+        :type u: Vertex
+        :param v: The vertex dertination of the edge.
+        :type v: Vertex
+        :param value: The value of the edge.
+        :type value: any, optional
+        :returns: A boolean meaning if the operation succeed. The operation
+                  fails if the edge is already in the graph.
+        :rtype: bool
         """
         if u not in self._adjacency:
             self.insert_vertex(u)
         if v not in self._adjacency:
             self.insert_vertex(v)
-        self._adjacency_map[u][v] = Edge(u, v)
-        self._adjacency_map[v][u] = Edge(u, v)
+        if v in self._adjacency_map[u]:
+            return False
+        self._adjacency_map[u][v] = Edge(u, v, value)
+        self._adjacency_map[v][u] = Edge(u, v, value)
+        return True
 
-    def remove_vertex(self, v: Vertex) -> NoReturn:
+    def remove_vertex(self, v: Vertex) -> bool:
         """
-        Remove the vertex v from the graph. Every incident edge will be also
-        deleted.
+        Removes the vertex ``v`` from the graph. Every incident edge will be
+        also deleted.
+
+        :param v: The vertex to remove.
+        :type v: Vertex
+        :returns: A boolean meaning if the removal was correctly performed. If
+                  the vertex is not in the graph, then False is returned.
+        :rtype: bool
         """
         if v not in self._adjacency_map:
-            raise ValueError(f'The vertex {v} is not part of this graph.')
+            return False
 
         for e in self._adjacency_map[v].values():
             self.remove_edge(e)
         del self.adjacency_map[v]
 
-    def remove_edge(self, e: Edge) -> NoReturn:
-        """Remove the edge e from the graph."""
+    def remove_edge(self, e: Edge) -> bool:
+        """
+        Removes the edge ``e`` from the graph.
+
+        :param e: The edge to remove.
+        :type e: Edge
+        :returns: True if the edge was in the graph and has been removed,
+                  otherwise False.
+        :rtype: bool
+        """
         if e.origin not in self._adjacency_map or \
                 e.destination not in self._adjacency_map or \
                 e != self._adjacency_map[e.origin][e.destination]:
