@@ -1,8 +1,8 @@
 """
 This module provides a interface for graphs that is used in this package.
 """
-from typing import Union, Hashable, Optional, Any, NoReturn, Tuple, List, Set
 from __future__ import annotations
+from typing import Union, Hashable, Optional, Any, NoReturn, Tuple, List, Set
 
 
 class Vertex:
