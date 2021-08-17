@@ -2,6 +2,7 @@
 This module provides a interface for graphs that is used in this package.
 """
 from __future__ import annotations
+import collections
 from typing import Union, Hashable, Optional, Any, NoReturn, Tuple, List, Set
 
 
@@ -10,26 +11,52 @@ class Vertex:
     A class representing a vertex. This is a wrapper for a value.
     """
 
-    __slots__ = ['value']
+    __slots__ = ['_value']
 
-    def __init__(self, value: Hashable) -> NoReturn:
+    def __init__(self, value: Optional(Hashable) = None) -> NoReturn:
         """
         Builds a new vertex.
 
         :param value: The ``value`` the vertex wraps. It must be hashable.
         """
-        self = value = value
+        self.value = value
+
+    @property
+    def value(self):
+        self._value
+
+    @value.setter
+    def value(self, value):
+        hash(value) # Check if value is hashable.
+        self._value = value
+
+    @value.getter
+    def value(self):
+        return self._value
 
     def __eq__(self, v: Vertex) -> bool:
         """
         Returns if ``v`` is equal to this vertex.
 
         :param v: A vertex to compare.
+        :type v: Vertex
         :returns: A boolean meaning if the vertex ``v`` and the current
                   instance are equal.
         :rtype: bool
         """
         return self.value == v.value
+
+    def __ne__(self, v: Vertex) -> bool:
+        """
+        Returns True if the value of ``v`` is not equal to the value of this
+        instance.
+
+        :params v: A vertex to compare.
+        :type: Vertex
+        :returns: True if the two vertices are not equal, False otherwise.
+        :rtype: bool
+        """
+        return not self.__eq__(v)
 
     def __str__(self) -> str:
         """
@@ -44,7 +71,7 @@ class Vertex:
 
 class Edge:
     """
-    A class representing an edge. It can be either oriented or not since
+    This class represents an edge. It can be either oriented or not since
     it contains two attributes ``origin`` and ``destination`` may express an
     orientation.
     """
