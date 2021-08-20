@@ -13,7 +13,7 @@ class Vertex:
 
     __slots__ = ['_value']
 
-    def __init__(self, value: Optional(Hashable) = None) -> NoReturn:
+    def __init__(self, value: Optional(Hashable)=None) -> NoReturn:
         """
         Builds a new vertex.
 
@@ -22,7 +22,7 @@ class Vertex:
         self.value = value
 
     @property
-    def value(self):
+    def value(self): # pragma: no cover
         self._value
 
     @value.setter
@@ -68,21 +68,24 @@ class Vertex:
         """
         return f'Vertex({self.value})'
 
+    def __hash__(self) -> int:
+        return hash(self.value)
+
 
 class Edge:
     """
     This class represents an edge. It can be either oriented or not since
-    it contains two attributes ``origin`` and ``destination`` may express an
-    orientation.
+    it contains two attributes ``origin`` and ``destination`` that may express
+    an orientation.
     """
 
-    __slots__ = ['origin', 'destination', 'value']
+    __slots__ = ['_origin', '_destination', '_value']
 
     def __init__(self, origin: Vertex, destination: Vertex,
-                 value: Optional(Any)) -> NoReturn:
+                 value: Optional(Hashable)=None) -> NoReturn:
         """
-        Builds an edge from the two vertices. It can be considered oriented or
-        not.
+        Builds an edge from the two vertices ``origin`` and ``destination``. 
+        It can be considered oriented or not.
 
         :param origin: The origin vertex if it's oriented, or simply one of
                        the two vertices.
@@ -90,32 +93,72 @@ class Edge:
         :param destination: The destination vertex if it's oriented, or simply
                             one of the two vertices.
         :param value: A value that can be used as an attribute of the edge.
-                      This value is optional and can be of any type.
+                      This value is optional and must be hashable.
         """
         self.origin = origin
         self.destination = destination
         self.value = value
 
+    @property
+    def origin(self): # pragma: no cover
+        return self._origin
+
+    @origin.setter
+    def origin(self, origin):
+        if type(origin) is not Vertex:
+            raise TypeError('The attribute origin must be of type Vertex.')
+        self._origin = origin
+
+    @origin.getter
+    def origin(self):
+        return self._origin
+
+    @property
+    def destination(self): # pragma: no cover
+        return self._destination
+
+    @destination.setter
+    def destination(self, destination):
+        if type(destination) is not Vertex:
+            raise TypeError('The attribute destination must be of type '
+                'Vertex.')
+        self._destination = destination
+
+    @destination.getter
+    def destination(self):
+        return self._destination
+
+    @property
+    def value(self): # pragma: no cover
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        hash(value) # Check if value is hashable.
+        self._value = value
+
+    @value.getter
+    def value(self):
+        return self._value
+
     def endpoints(self) -> Tuple[Vertex, Vertex]:
         """
-        Returns a tuple containing the vertices origin and destination.
+        Returns a tuple containing the vertices ``origin`` and ``destination``.
 
         :returns: A tuple containing the two vertices that composed the edge.
                   Since it can be oriented, the position is
                   (``origin``, ``destination``).
-        :rtype: tuple
+        :rtype: tuple(Vertex, Vertex)
         """
         return (self.origin, self.destination)
 
     def opposite(self, v: Vertex) -> Vertex:
         """
-        Returns the opposite vertex.
+        Returns the opposite vertex of ``v``. If ``v`` is not part of this
+        edge, None is returned.
 
         :param v: A vertex contained in the edge.
         :type v: Vertex
-
-        :raises ValueError: If the vertex ``v`` is not part of the edge.
-
         :returns: The opposite vertex of ``v``.
         :rtype: Vertex
         """
@@ -124,21 +167,24 @@ class Edge:
         elif self.destination == v:
             return self.origin
         else:
-            raise ValueError(f'The vertex {v} is not part of this edge.')
+            return None
 
     def __str__(self) -> str:
         """
         Returns a string representation of this edge in this format
         Edge(``origin``, ``destination``, ``value``) if the value exists
         otherwise the last attribute is skipped.
+
+        :returns: A string representation of this edge.
+        :rtype: str
         """
-        return f'Edge(origin={self.origin}, destination={self.destination}' +\
-            (f' ,{self.value})' if self.value is not None else ')')
+        return f'Edge({self.origin}, {self.destination}' +\
+            (f', {self.value})' if self.value is not None else ')')
 
     def __eq__(self, e: Edge) -> bool:
         """
-        Returns if the edge ``e`` is equal to this one. For two edges to be
-        equal, each of their attributes must also be equal.
+        Returns True if the edge ``e`` is equal to this one, False otherwise.
+        For two edges to be equal, each of their attributes must also be equal.
 
         :param e: The other edge to compare with.
         :type e: Edge
@@ -151,8 +197,8 @@ class Edge:
 
     def __ne__(self, e: Edge) -> bool:
         """
-        Returns if the edge is not equal to this one. It uses __eq__ to
-        compute it.
+        Returns True if the edge ``e`` is not equal to this one, False
+        otherwise. It uses __eq__ to compute it.
 
         :param e: The edge to compare with.
         :type e: Edge
@@ -173,8 +219,11 @@ class Edge:
         """
         return self.origin == v or self.destination == v
 
+    def __hash__(self) -> int:
+        return hash((self._origin, self._destination, self._value))
 
-class Graph:
+
+class _Graph: # pragma: no cover
     """
     The abstract data type graph. This class must not be instanciate. It is
     only used as interface. It provides a wrapper to not be dependant of a
@@ -257,13 +306,13 @@ class Graph:
         raise NotImplemented()
 
 
-class AdjacencyMapGraph(Graph):
+class AdjacencyMapGraph(_Graph):
     """
     A graph implemented with an adjacency hash table. It follows the interface
     :class:`Graph`.
     """
 
-    __slots__ = ['_adjacency_map', '_count_edge']
+    __slots__ = ['_adjacency_map', '_edge_count']
 
     def __init__(self) -> NoReturn:
         """
@@ -271,7 +320,7 @@ class AdjacencyMapGraph(Graph):
         is performed in O(1).
         """
         self._adjacency_map = dict()
-        self._count_edge = 0
+        self._edge_count = 0
 
     def vertices(self) -> list[Vertex]:
         """
@@ -291,8 +340,8 @@ class AdjacencyMapGraph(Graph):
         :returns: A list of the edges of the graph.
         :rtype: list of :class:`Edge`
         """
-        return [{e for edge_dict in self._adjacency_map.values() \
-                for e in edge_dict.values()}]
+        return list({e for edge_dict in self._adjacency_map.values() \
+                     for e in edge_dict.values()})
 
     def vertex_count(self) -> int:
         """
@@ -312,7 +361,7 @@ class AdjacencyMapGraph(Graph):
         :returns: The number of edges the graph contains.
         :rype: int
         """
-        return self._count_edge
+        return self._edge_count
 
     def has_edge(self, e: Edge) -> bool:
         """
@@ -322,10 +371,9 @@ class AdjacencyMapGraph(Graph):
         :returns: A boolean meaning if the edge ``e`` is in the graph.
         :rtype: bool
         """
-        adj_vertices = self._adjacency_map[e.origin]
-        if adj_vertices is None:
-            return False
-        return adj_vertices[e.destination] is not None
+        return e.origin in self._adjacency_map and \
+            e.destination in self._adjacency_map[e.origin] and \
+            e == self._adjacency_map[e.origin][e.destination]
 
     def get_edge(self, u: Vertex, v: Vertex) -> Edge:
         """
@@ -341,24 +389,33 @@ class AdjacencyMapGraph(Graph):
         :returns: The edge composed of ``u`` and ``v``.
         :rtype: :class:`Edge`
         """
-        return self._adjacency_map[u][v]
+        if u not in self._adjacency_map or \
+                v not in self._adjacency_map[u]:
+            return None
+        e = self._adjacency_map[u][v]
+        if e.origin == u and e.destination == v:
+            return e
+        return None
 
     def degree(self, v: Vertex, out=False) -> int:
         """
         Returns the degree of the vertex ``v``. If ``out`` is True, then
         the number of out edges is returned, the number of every incident
         edges is returned otherwise. The operation is performed in O(d_v) where
-        d_v is the degree of the vertex ``v``.
+        d_v is the degree of the vertex ``v``. If ``v`` is not in the graph,
+        None is returned.
 
         :param v: The vertex ``v`` for the one the degree is requested.
         :type v: :class:`Vertex`
         :returns: The degree of the vertex ``v``.
         :rtype: int
         """
+        if v not in self._adjacency_map:
+            return None
         if out:
             count = 0
             for e in self._adjacency_map[v].values():
-                if self.origin == v:
+                if e.origin == v:
                     count += 1
             return count
         else:
@@ -398,7 +455,7 @@ class AdjacencyMapGraph(Graph):
         return True
 
     def insert_edge(self, u: Vertex, v: Vertex,
-                    value: Optional(Any)) -> bool:
+                    value: Optional(Any)=None) -> bool:
         """
         Inserts the edge (u, v) in the graph. If a vertex doesn't exist in
         the graph, it will be added. This operation is performed in O(1)
@@ -414,14 +471,15 @@ class AdjacencyMapGraph(Graph):
                   fails if the edge is already in the graph.
         :rtype: bool
         """
-        if u not in self._adjacency:
+        if u not in self._adjacency_map:
             self.insert_vertex(u)
-        if v not in self._adjacency:
+        if v not in self._adjacency_map:
             self.insert_vertex(v)
         if v in self._adjacency_map[u]:
             return False
         self._adjacency_map[u][v] = Edge(u, v, value)
         self._adjacency_map[v][u] = Edge(u, v, value)
+        self._edge_count += 1
         return True
 
     def remove_vertex(self, v: Vertex) -> bool:
@@ -438,9 +496,12 @@ class AdjacencyMapGraph(Graph):
         if v not in self._adjacency_map:
             return False
 
-        for e in self._adjacency_map[v].values():
+
+        edges = list(self._adjacency_map[v].values())
+        for e in edges:
             self.remove_edge(e)
-        del self.adjacency_map[v]
+        del self._adjacency_map[v]
+        return True
 
     def remove_edge(self, e: Edge) -> bool:
         """
@@ -453,8 +514,10 @@ class AdjacencyMapGraph(Graph):
         :rtype: bool
         """
         if e.origin not in self._adjacency_map or \
-                e.destination not in self._adjacency_map or \
+                e.destination not in self._adjacency_map[e.origin] or \
                 e != self._adjacency_map[e.origin][e.destination]:
-            raise ValueError(f'The edge {e} is not part of the graph.')
+            return False
         del self._adjacency_map[e.origin][e.destination]
         del self._adjacency_map[e.destination][e.origin]
+        self._edge_count -= 1
+        return True

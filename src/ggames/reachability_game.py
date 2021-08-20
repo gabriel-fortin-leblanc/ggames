@@ -5,7 +5,6 @@ of elements of S_0 U S_1.
 """
 
 import logging
-from .graph import Vertex, Graph
 from typing import Type, Any
 
 
