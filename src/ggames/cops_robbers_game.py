@@ -7,8 +7,66 @@ A Cops and Robbers game is played on an edge periodic (or static) graph
 import logging
 import math, copy
 import functools, itertools
-from . import reachability_game
+import typing
+from . import graph
+from . import reachability_game as rg
 
+
+class NPlayersCopsRobbersGame:
+
+    __slots__ = ['_players_count', '_graph', '_game_graph']
+
+    def __init__(self) -> typing.NoReturn:
+        pass
+
+    @property
+    def players_count(self): # pragma: no cover
+        pass
+
+    @players_count.setter
+    def players_count(self, players_count: int) -> typing.NoReturn:
+        pass
+
+    @players_count.getter
+    def players_count(self) -> int:
+        pass
+
+    @property
+    def graph(self): # pragma: no cover
+        pass
+
+    @graph.setter
+    def graph(self, graph: typing.Any) -> typing.NoReturn:
+        pass
+
+    @graph.getter
+    def graph(self) -> typing.Type[graph._Graph]:
+        pass
+
+    @property
+    def game_graph(self): # pragma: no cover
+        pass
+
+    @game_graph.setter
+    def game_graph(self, game_graph: typing.Type[graph._Graph]) \
+            -> typing.NoReturn:
+        pass
+
+    @game_graph.getter
+    def game_graph(self) -> typing.Type[graph._Graph]:
+        pass
+
+    def _terminate_condition(self, state: typing.Tuple) -> typing.NoReturn:
+        pass
+
+    def _compute_game_graph(self) -> typing.Type[graph._Graph]:
+        pass
+
+    def _compute_reachability_game(self) -> typing.Type[rg.ReachabilityGame]:
+        pass
+
+    def is_n_player_win(self, n: int) -> bool:
+        pass
 
 
 def get_game_graph(V, E, tau=None, k=1):
