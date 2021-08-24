@@ -29,6 +29,17 @@ class NPlayersCopsRobbersGame:
         takes place on the ``graph``. The type of ``graph`` must be supported.
         See ``graph.AdjacencyMapGraph.create_instance`` for more information
         about the supported types of graph.
+
+        :raises TypeError: An error is raised if ``graph`` is an instance of
+                           an unsupported type.
+        :raises ValueError: An error is raised if ``n`` is not greater than or
+                            equal to 2.
+
+        :param graph: The graph the game takes place on.
+        :type graph: any
+        :param n: The number of players in the game. This number must be
+                  greater than 1.
+        :type n: int
         """
         self.graph = graph
         self.player_count = n
@@ -66,7 +77,7 @@ class NPlayersCopsRobbersGame:
 
     @game_graph.setter
     def game_graph(self, game_graph: typing.Type[graph._Graph]) \
-            -> typing.NoReturn:
+                   -> typing.NoReturn:
         self._game_graph = game_graph
 
     @game_graph.getter
@@ -77,7 +88,12 @@ class NPlayersCopsRobbersGame:
 
     def _terminale_condition(self, state: typing.Tuple) -> typing.NoReturn:
         """
-        Returns True if the ``state`` is a terminal one, False otherwise.
+        Returns `True` if the ``state`` is a terminal one, `False` otherwise.
+
+        :param state: A state (configuration) of the game.
+        :type state: tuple
+        :returns: `True` if the ``state`` is a terminal one.
+        :rtype: bool
         """
         positions = state[:-1]
         for k in range(1, len(positions)):
@@ -85,7 +101,15 @@ class NPlayersCopsRobbersGame:
                 return True
         return False
 
-    def _compute_game_graph(self) -> typing.Type[graph._Graph]:
+    def _compute_game_graph(self) -> graph.AdjacencyMapGraph:
+        """
+        Computes and returns the game graph of the game.
+
+        :returns: A directed graph where each vertex is a state of the game and
+                  the arcs represent the transition function between the
+                  states.
+        :rtype: :class:`AdjacencyMapGraph`
+        """
         game_graph = graph.AdjacencyMapGraph()
         for s in range(self.players_count):
             for pos in itertools.product(self._graph.vertices(),
@@ -97,12 +121,58 @@ class NPlayersCopsRobbersGame:
                 for next_pos in self._graph.neighbours(pos[s]):
                     next_state = (*pos[:s], next_pos, *pos[s+1:], s+1)
                     game_graph.insert_edge(state, next_state)
+        return game_graph
 
-    def _compute_reachability_game(self) -> typing.Type[rg.ReachabilityGame]:
-        pass
+    def _compute_reachability_game(self, n: int) \
+                                   -> reachability_game.ReachabilityGame:
+        """
+        Computes and returns a reachability game where the reachable set of the
+        game is composed of the set where the player ``n`` in the cops and
+        robbers game wins.
+
+        :raises ValueError: An error is raised if n is not between 0 and
+                            ``players_count``.
+
+        :param n: The player of the cops and robbers game for which his winning
+                  induces the reachable set. The integer ``n`` must be between
+                  0 and ``players_count``.
+        :type n: int
+        :returns: The reachability game induced by the cops and robbers game.
+        :rtype: reachability_game.ReachabilityGame
+        """
+        if n < 0 or n >= self.players_count:
+            raise ValueError('The integer ``n`` must be between 0 and the '
+                'attribute players_count.')
+
+        v0 = set()
+        v1 = set()
+        finals = set()
+        for v in self.game_graph.vertices():
+            *pos, s in v.value
+            pos_set = set(pos)
+            if s == n:
+                v0.add(v)
+            else:
+                v1.add(v)
+
+            if n == 0 and self.game_graph.degree(v, True) == 0 and \
+                    len(pos_set) == self.players_count:
+                finals.add(v)
+            elif len(pos_set) == self.players_count - 1 and \
+                    pos[n] == pos[n - 1]:
+                finals.add(v)
+        return rg.ReachabilityGame(self.game_graph, v0, v1, finals)
 
     def is_n_player_win(self, n: int) -> bool:
-        pass
+        """
+        Returns `True` if the player ``n`` wins, `False` otherwise.
+
+        :param n: The interesting player.
+        :type n: int
+        :returns: `True` if the graph is n-player-winning, `False` otherwise.
+        :rtype: bool
+        """
+        return not self._compute_reachability_game(n).who_win()
 
 
 def get_game_graph(V, E, tau=None, k=1):
