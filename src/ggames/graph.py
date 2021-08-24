@@ -266,7 +266,7 @@ class _Graph: # pragma: no cover
         """
         raise NotImplemented()
 
-    def degree(self, v: Vertex, out=True) -> int:
+    def degree(self, v: Vertex, out: bool=False) -> int:
         """
         Returns the degree of the vertex v. Only the out degree of ``v`` is
         returned if ``out`` is True. To get the in degree of ``v``, the user
@@ -274,7 +274,15 @@ class _Graph: # pragma: no cover
         """
         raise NotImplemented()
 
-    def incident_edges(self, v: Vertex, out=True) -> list[Edge]:
+    def neighbours(self, v: Vertex, out: bool=False) -> List[Vertex]:
+        """
+        Returns a list of all adjacency vertices of ``v``. If ``out`` is True,
+        then the edges are considered oriented and only the out adjacency
+        vertices of ``v`` are returned.
+        """
+        raise NotImplemented()
+
+    def incident_edges(self, v: Vertex, out: bool=False) -> list[Edge]:
         """
         Returns a list of the incident edges of the vertex v.
         """
@@ -313,6 +321,44 @@ class AdjacencyMapGraph(_Graph):
     """
 
     __slots__ = ['_adjacency_map', '_edge_count']
+
+    @staticmethod
+    def create_instance(graph: Any) -> AdjacencyMapGraph:
+        """
+        Returns a graph instance of :class:`AdjacencyMapGraph` from another
+        type of graph.
+        The types of graph supported are:
+            * AdjacencyMapGraph
+        If ``graph`` is an instance of :class:`AdjacencyMapGraph`, then a deep
+        copy is processed.
+
+        :param graph: The graph to represent as :class:`AdjacencyMapGraph`.
+        :type graph: A supported type of graph as specified above.
+        :returns: A copy of ``graph`` as :class:`AdjacencyMapGraph`.
+        :rtype: :class:`AdjacencyMapGraph`.
+        """
+        if type(graph) is AdjacencyMapGraph:
+            return AdjacencyMapGraph.copy(graph)
+        raise TypeError(f'The type {type(graph)} is not supported as a graph.')
+
+    @staticmethod
+    def copy(graph: AdjacencyMapGraph) -> AdjacencyMapGraph:
+        """
+        Returns a deep copy of an AdjacencyMapGraph instance.
+
+        :param graph: The graph to copy.
+        :type graph: :class:`AdjacencyMapGraph`
+        :returns: A deep copy of the ``graph``. Each vertex is a copy and each
+                  edge is also a copy. Only the values of the components remain
+                  the same.
+        :rtype: :class:`AdjacencyMapGraph`.
+        """
+        graph_copy = AdjacencyMapGraph()
+        for v in graph.vertices():
+            graph_copy.insert_vertex(Vertex(v.value))
+        for e in graph.edges():
+            graph_copy.insert_edge(e.origin, e.destination, e.value)
+        return graph_copy
 
     def __init__(self) -> NoReturn:
         """
@@ -397,7 +443,7 @@ class AdjacencyMapGraph(_Graph):
             return e
         return None
 
-    def degree(self, v: Vertex, out=False) -> int:
+    def degree(self, v: Vertex, out: bool=False) -> int:
         """
         Returns the degree of the vertex ``v``. If ``out`` is True, then
         the number of out edges is returned, the number of every incident
@@ -421,7 +467,25 @@ class AdjacencyMapGraph(_Graph):
         else:
             return len(self._adjacency_map[v])
 
-    def incident_edges(self, v: Vertex, out=False) -> list[Edge]:
+    def neighbours(self, v: Vertex, out: bool=False) -> List[Vertex]:
+        """
+        Returns a list of all neighbours of ``v``. If ``out`` is True, then
+        only the out neighbours of ``v`` are returned.
+
+        :param v: The vertex for the one the neighbours are requested.
+        :type v: :class:`Vertex`
+        :returns: A list of all neighbours of ``v``.
+        :rtype: list of :class:`Vertex`
+        """
+        if v not in self._adjacency_map:
+            return None
+        if out:
+            return [u for u, e in self._adjacency_map[v].items() \
+                    if e.origin == v]
+        else:
+            return self._adjacency_map[v].keys()
+
+    def incident_edges(self, v: Vertex, out: bool=False) -> list[Edge]:
         """
         Returns a list of the incident edges of the vertex ``v``. This
         operation is performed in O(d_v) where d_v is the degree of ``v``.
@@ -521,3 +585,29 @@ class AdjacencyMapGraph(_Graph):
         del self._adjacency_map[e.destination][e.origin]
         self._edge_count -= 1
         return True
+
+    def __eq__(self, graph: AdjacencyMapGraph) -> bool:
+        """
+        Returns True if ``graph`` is equal to this instance, otherwise False.
+        For two graphs to be equal, they must have the same set of vertices and
+        the same set of edges.
+
+        :param graph: The graph to compare.
+        :type graph: AdjacencyMapGraph
+        :returns: True if ``graph`` is equal to this instance, False otherwise.
+        :rtype: bool
+        """
+        return set(self.vertices()) == set(graph.vertices()) and \
+            set(self.edges()) == set(graph.edges())
+
+    def __ne__(self, graph: AdjacencyMapGraph) -> bool:
+        """
+        Returns True if ``graph`` is not equal to this instance, False
+        otherwise. This function uses the function __eq__ to decide this one.
+
+        :param graph: The graph to compare.
+        :type graph: AdjacencyMapGraph
+        :returns: True if ``graph`` is not equal to this instance.
+        :rtype: bool
+        """
+        return not self.__eq__(graph)

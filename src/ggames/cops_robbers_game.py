@@ -4,6 +4,7 @@ A Cops and Robbers game is played on an edge periodic (or static) graph
 """
 
 
+from __future__ import annotations
 import logging
 import math, copy
 import functools, itertools
@@ -13,54 +14,87 @@ from . import reachability_game as rg
 
 
 class NPlayersCopsRobbersGame:
+    """
+    This class is the base class representing a cops and robbers game with N
+    independant players. For every k in [1..N], the player k wins if he
+    occupies the player k-1. Every cops and robbers game inherits from this
+    one, or a subclass of it.
+    """
 
     __slots__ = ['_players_count', '_graph', '_game_graph']
 
-    def __init__(self) -> typing.NoReturn:
-        pass
+    def __init__(self, graph: typing.Any, n: int) -> typing.NoReturn:
+        """
+        Builds an instance of cops and robbers game with ``n`` players that
+        takes place on the ``graph``.
+        """
+        self.graph = graph
+        self.player_count = n
 
     @property
     def players_count(self): # pragma: no cover
-        pass
+        return self._players_count
 
     @players_count.setter
     def players_count(self, players_count: int) -> typing.NoReturn:
-        pass
+        if players_count < 2:
+            raise ValueError('The attribute players_count must be greater '
+                'than 1.')
+        self._players_count = players_count
 
     @players_count.getter
     def players_count(self) -> int:
-        pass
+        return self._players_count
 
     @property
     def graph(self): # pragma: no cover
-        pass
+        return self._graph
 
     @graph.setter
     def graph(self, graph: typing.Any) -> typing.NoReturn:
-        pass
+        self._graph = graph.AdjacencyMapGraph.create_instance(graph)
 
     @graph.getter
     def graph(self) -> typing.Type[graph._Graph]:
-        pass
+        return self._graph
 
     @property
     def game_graph(self): # pragma: no cover
-        pass
+        return self._game_graph
 
     @game_graph.setter
     def game_graph(self, game_graph: typing.Type[graph._Graph]) \
             -> typing.NoReturn:
-        pass
+        self._game_graph = game_graph
 
     @game_graph.getter
     def game_graph(self) -> typing.Type[graph._Graph]:
-        pass
+        if self._game_graph is None:
+            self._game_graph = self._compute_game_graph()
+        return self._game_graph
 
-    def _terminate_condition(self, state: typing.Tuple) -> typing.NoReturn:
-        pass
+    def _terminale_condition(self, state: typing.Tuple) -> typing.NoReturn:
+        """
+        Returns True if the ``state`` is a terminal one, False otherwise.
+        """
+        positions = state[:-1]
+        for k in range(1, len(positions)):
+            if positions[k] == positions[k-1]:
+                return True
+        return False
 
     def _compute_game_graph(self) -> typing.Type[graph._Graph]:
-        pass
+        game_graph = graph.AdjacencyMapGraph()
+        for s in range(self.players_count):
+            for pos in itertools.product(self._graph.vertices(),
+                                         repeat=self.players_count):
+                state = (*pos, s)
+                game_graph.insert_vertex(state)
+                if self._terminal_condition(state):
+                    continue
+                for next_pos in self._graph.neighbours(pos[s]):
+                    next_state = (*pos[:s], next_pos, *pos[s+1:], s+1)
+                    game_graph.insert_edge(state, next_state)
 
     def _compute_reachability_game(self) -> typing.Type[rg.ReachabilityGame]:
         pass
@@ -168,7 +202,7 @@ def is_kcop_win(V, E, tau=None, k=1):
     logger = logging.getLogger('main.com_robber_game')
     logger.info('"cops_robbers_game.is_kcop_win" called.')
 
-    attractor = reachability_game.get_attractor(
+    attractor = rg.get_attractor(
             *game_graph_to_reachability_game(
             *get_game_graph(V, E, tau, k)))
 
