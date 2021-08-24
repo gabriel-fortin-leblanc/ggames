@@ -3,7 +3,7 @@ This module provides a interface for graphs that is used in this package.
 """
 from __future__ import annotations
 import collections
-from typing import Union, Hashable, Optional, Any, NoReturn, Tuple, List, Set
+import typing
 
 
 class Vertex:
@@ -13,11 +13,15 @@ class Vertex:
 
     __slots__ = ['_value']
 
-    def __init__(self, value: Optional(Hashable)=None) -> NoReturn:
-        """
+    def __init__(self, value: typing.Optional(typing.Hashable)=None) \
+                 -> typing.NoReturn:
+        """Constructor method
         Builds a new vertex.
 
+        :raises TypeError: An error is raised if ``value`` is not hashable.
+
         :param value: The ``value`` the vertex wraps. It must be hashable.
+        :type value: any
         """
         self.value = value
 
@@ -36,24 +40,24 @@ class Vertex:
 
     def __eq__(self, v: Vertex) -> bool:
         """
-        Returns if ``v`` is equal to this vertex.
+        Returns `True` if the value of ``v`` is equal to the value of this
+        instance, `False` otherwise.
 
         :param v: A vertex to compare.
         :type v: Vertex
-        :returns: A boolean meaning if the vertex ``v`` and the current
-                  instance are equal.
+        :returns: `True` if the two vertices are equal, `False` otherwise.
         :rtype: bool
         """
         return self.value == v.value
 
     def __ne__(self, v: Vertex) -> bool:
         """
-        Returns True if the value of ``v`` is not equal to the value of this
-        instance.
+        Returns `True` if the value of ``v`` is not equal to the value of this
+        instance, `False` otherwise.
 
         :params v: A vertex to compare.
         :type: Vertex
-        :returns: True if the two vertices are not equal, False otherwise.
+        :returns: `True` if the two vertices are not equal, `False` otherwise.
         :rtype: bool
         """
         return not self.__eq__(v)
@@ -63,12 +67,18 @@ class Vertex:
         Returns the string representation of this vertex. It calls the __str__
         magic method of the value wrapped in this format Vertex(``value``).
 
-        :returns: Returns a string representation of the vertex.
+        :returns: Returns a string representation of the instance.
         :rtype: str
         """
         return f'Vertex({self.value})'
 
     def __hash__(self) -> int:
+        """
+        Returns a hashing representation of the ``value`` of the instance.
+
+        :returns: The hashing representation of the ``value``.
+        :rtype: int
+        """
         return hash(self.value)
 
 
@@ -82,18 +92,25 @@ class Edge:
     __slots__ = ['_origin', '_destination', '_value']
 
     def __init__(self, origin: Vertex, destination: Vertex,
-                 value: Optional(Hashable)=None) -> NoReturn:
-        """
+                 value: typing.Optional(typing.Hashable)=None) \
+                 -> typing.NoReturn:
+        """Constructor method
         Builds an edge from the two vertices ``origin`` and ``destination``. 
         It can be considered oriented or not.
+
+        :raises TypeError: An error is raised if ``origin`` or ``destination``
+                           is not an instance of the :class:`Vertex`, or even
+                           if the ``value`` is not hashable.
 
         :param origin: The origin vertex if it's oriented, or simply one of
                        the two vertices.
         :type origin: Vertex
         :param destination: The destination vertex if it's oriented, or simply
                             one of the two vertices.
+        :type destination: Vertex
         :param value: A value that can be used as an attribute of the edge.
                       This value is optional and must be hashable.
+        :type value: any
         """
         self.origin = origin
         self.destination = destination
@@ -141,7 +158,7 @@ class Edge:
     def value(self):
         return self._value
 
-    def endpoints(self) -> Tuple[Vertex, Vertex]:
+    def endpoints(self) -> typing.Tuple[Vertex, Vertex]:
         """
         Returns a tuple containing the vertices ``origin`` and ``destination``.
 
@@ -220,6 +237,12 @@ class Edge:
         return self.origin == v or self.destination == v
 
     def __hash__(self) -> int:
+        """
+        Returns a hash representation of the instance.
+
+        :returns: A hash representation of the instance.
+        :rtype: int
+        """
         return hash((self._origin, self._destination, self._value))
 
 
@@ -230,13 +253,13 @@ class _Graph: # pragma: no cover
     specific library.
     """
 
-    def vertices(self) -> List[Vertex]:
+    def vertices(self) -> typing.List[Vertex]:
         """
         Returns a list of the vertices of the graph.
         """
         raise NotImplemented()
 
-    def edges(self) -> list[Edge]:
+    def edges(self) -> typing.List[Edge]:
         """
         Returns a list of edges of the graph.
         """
@@ -282,7 +305,7 @@ class _Graph: # pragma: no cover
         """
         raise NotImplemented()
 
-    def incident_edges(self, v: Vertex, out: bool=False) -> list[Edge]:
+    def incident_edges(self, v: Vertex, out: bool=False) -> typing.List[Edge]:
         """
         Returns a list of the incident edges of the vertex v.
         """
@@ -295,7 +318,7 @@ class _Graph: # pragma: no cover
         raise NotImplemented()
 
     def insert_edge(self, u: Vertex, v: Vertex,
-                    value: Optional(Any)) -> bool:
+                    value: typing.Optional(typing.Any)=None) -> bool:
         """
         Inserts the edge (u, v) in the graph. If a vertex doesn't exist in
         the graph, it will be added.
@@ -323,7 +346,7 @@ class AdjacencyMapGraph(_Graph):
     __slots__ = ['_adjacency_map', '_edge_count']
 
     @staticmethod
-    def create_instance(graph: Any) -> AdjacencyMapGraph:
+    def create_instance(graph: typing.Any) -> AdjacencyMapGraph:
         """
         Returns a graph instance of :class:`AdjacencyMapGraph` from another
         type of graph.
@@ -331,6 +354,9 @@ class AdjacencyMapGraph(_Graph):
             * AdjacencyMapGraph
         If ``graph`` is an instance of :class:`AdjacencyMapGraph`, then a deep
         copy is processed.
+
+        :raises TypeError: An error is returned if ``graph`` is an instance of
+                           an unsupported type.
 
         :param graph: The graph to represent as :class:`AdjacencyMapGraph`.
         :type graph: A supported type of graph as specified above.
@@ -360,15 +386,15 @@ class AdjacencyMapGraph(_Graph):
             graph_copy.insert_edge(e.origin, e.destination, e.value)
         return graph_copy
 
-    def __init__(self) -> NoReturn:
-        """
+    def __init__(self) -> typing.NoReturn:
+        """Constructor method
         Builds an instance of an :class:`AdjacencyMapGraph`. The operation
         is performed in O(1).
         """
         self._adjacency_map = dict()
         self._edge_count = 0
 
-    def vertices(self) -> list[Vertex]:
+    def vertices(self) -> typing.List[Vertex]:
         """
         Returns a list of the vertices of the graph. The operation is
         performed in O(n) for a graph of n vertices.
@@ -378,7 +404,7 @@ class AdjacencyMapGraph(_Graph):
         """
         return list(self._adjacency_map.keys())
 
-    def edges(self) -> list[Edge]:
+    def edges(self) -> typing.List[Edge]:
         """
         Returns a list of edges of the graph. The operation is performed in
         O(m) for a graph of m edges.
@@ -467,7 +493,7 @@ class AdjacencyMapGraph(_Graph):
         else:
             return len(self._adjacency_map[v])
 
-    def neighbours(self, v: Vertex, out: bool=False) -> List[Vertex]:
+    def neighbours(self, v: Vertex, out: bool=False) -> typing.List[Vertex]:
         """
         Returns a list of all neighbours of ``v``. If ``out`` is True, then
         only the out neighbours of ``v`` are returned.
@@ -485,7 +511,7 @@ class AdjacencyMapGraph(_Graph):
         else:
             return self._adjacency_map[v].keys()
 
-    def incident_edges(self, v: Vertex, out: bool=False) -> list[Edge]:
+    def incident_edges(self, v: Vertex, out: bool=False) -> typing.List[Edge]:
         """
         Returns a list of the incident edges of the vertex ``v``. This
         operation is performed in O(d_v) where d_v is the degree of ``v``.
@@ -519,7 +545,7 @@ class AdjacencyMapGraph(_Graph):
         return True
 
     def insert_edge(self, u: Vertex, v: Vertex,
-                    value: Optional(Any)=None) -> bool:
+                    value: typing.Optional(typing.Any)=None) -> bool:
         """
         Inserts the edge (u, v) in the graph. If a vertex doesn't exist in
         the graph, it will be added. This operation is performed in O(1)
