@@ -24,9 +24,11 @@ class NPlayersCopsRobbersGame:
     __slots__ = ['_players_count', '_graph', '_game_graph']
 
     def __init__(self, graph: typing.Any, n: int) -> typing.NoReturn:
-        """
+        """Constructor method
         Builds an instance of cops and robbers game with ``n`` players that
-        takes place on the ``graph``.
+        takes place on the ``graph``. The type of ``graph`` must be supported.
+        See ``graph.AdjacencyMapGraph.create_instance`` for more information
+        about the supported types of graph.
         """
         self.graph = graph
         self.player_count = n

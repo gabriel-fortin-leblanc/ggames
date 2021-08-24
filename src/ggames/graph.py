@@ -30,12 +30,12 @@ class Vertex:
         self._value
 
     @value.setter
-    def value(self, value):
+    def value(self, value: typing.Hashable) -> typing.NoReturn:
         hash(value) # Check if value is hashable.
         self._value = value
 
     @value.getter
-    def value(self):
+    def value(self) -> typing.Any:
         return self._value
 
     def __eq__(self, v: Vertex) -> bool:
@@ -121,13 +121,13 @@ class Edge:
         return self._origin
 
     @origin.setter
-    def origin(self, origin):
+    def origin(self, origin: Vertex) -> typing.NoReturn:
         if type(origin) is not Vertex:
             raise TypeError('The attribute origin must be of type Vertex.')
         self._origin = origin
 
     @origin.getter
-    def origin(self):
+    def origin(self) -> Vertex:
         return self._origin
 
     @property
@@ -135,14 +135,14 @@ class Edge:
         return self._destination
 
     @destination.setter
-    def destination(self, destination):
+    def destination(self, destination: Vertex) -> typing.NoReturn:
         if type(destination) is not Vertex:
             raise TypeError('The attribute destination must be of type '
                 'Vertex.')
         self._destination = destination
 
     @destination.getter
-    def destination(self):
+    def destination(self) -> Vertex:
         return self._destination
 
     @property
@@ -150,12 +150,12 @@ class Edge:
         return self._value
 
     @value.setter
-    def value(self, value):
+    def value(self, value: typing.Hashable) -> typing.NoReturn:
         hash(value) # Check if value is hashable.
         self._value = value
 
     @value.getter
-    def value(self):
+    def value(self) -> typing.Any:
         return self._value
 
     def endpoints(self) -> typing.Tuple[Vertex, Vertex]:
