@@ -11,11 +11,15 @@ from typing import Type, Any
 
 class ReachabilityGame:
 
-    __slots__ = ['digraph', 'vertices0', 'vertices1', 'finals', '_attractor']
+    __slots__ = ['vertices0', 'vertices1', 'digraph', 'finals', '_attractor']
 
-    def __init__(self, digraph: Any, vertices0: set, vertices1: set,
-                 finals: set) -> None:
-        pass
+    def __init__(self, vertices0: list, vertices1: list,
+                 digraph: Any, finals: set) -> None:
+        self.vertices0 = vertices0
+        self.vertices1 = vertices1
+        self.digraph = digraph
+        self.finals = finals
+        self._attractor = None
 
     @property
     def attractor(self):
@@ -23,19 +27,58 @@ class ReachabilityGame:
         pass
 
     @attractor.getter
-    def attrator(self):
+    def attractor(self):
         if self._attractor is None:
             self._attractor = self._compute_attractor()
         return self._attractor
 
-    def who_wins(self) -> bool:
-        pass
+    def who_wins(self, n:int) -> bool:
+        starting_classes = dict()
+        for *c, r, s, t in self.__getattribute__('attractor'):
+            c = tuple(c)
+            if t == 0 and not s:
+                if c not in starting_classes:
+                    starting_classes[c] = set()
+                starting_classes[c].add(r)
+        for cls in starting_classes.values():
+            if len(cls) == n:
+                return True
+        return False
 
-    def next_winning_moves(v: Any) -> list:
-        pass
+    def next_winning_moves(self, previous: Any, deg: Any) -> list:
+        in_attractor = dict()
+        S0_set = set(self.vertices0)
+        propagate_stack = list(self.finals)
+
+        for v in self.vertices0 + self.vertices1:
+            in_attractor[v] = False
+
+        while len(propagate_stack) > 0:
+            vertex = propagate_stack.pop()
+            in_attractor[vertex] = True
+
+            for prev in previous[vertex]:
+                deg[prev] -= 1
+                if (prev in S0_set or deg[prev] == 0) \
+                        and not in_attractor[prev]:
+                    propagate_stack.append(prev)
+
+        return [vertex for vertex, is_in_attractor in in_attractor.items()
+                if is_in_attractor]
 
     def _compute_attractor(self) -> set:
-        pass
+        previous = dict()
+        num_out_degree = dict()
+
+        for v in self.vertices0 + self.vertices1:
+            previous[v] = set()
+            num_out_degree[v] = 0
+
+        for u, v in self.digraph:
+            previous[v].add(u)
+            num_out_degree[u] += 1
+
+        return set(self.next_winning_moves(previous, num_out_degree))
 
 
 def get_attractor(S0, S1, A, F):
