@@ -1,4 +1,5 @@
 from ggames.reachability_game import *
+from ggames import graph
 
 
 S0 = [1, 2]
@@ -22,6 +23,88 @@ A = [(1, 3), (1, 2), (2, 1), (2, 4), (3, 1), (3, 4), (4, 5)]
 F = [5]
 reachability_game3 = S0, S1, A, F
 attractor3 = [4, 5]
+
+
+# Tests of ReachabilityGame class
+def test_RG_init():
+    G = graph.AdjacencyMapGraph()
+    S0, S1, A, F = reachability_game1
+    for u, v in A:
+        G.insert_edge(graph.Vertex(u), graph.Vertex(v))
+    S0 = {graph.Vertex(u) for u in S0}
+    S1 = {graph.Vertex(u) for u in S1}
+    F = {graph.Vertex(u) for u in F}
+
+    try:
+        rg = ReachabilityGame(set(), set(), F, G)
+    except ValueError as e:
+        assert str(e) == 'The union of the sets vertices0 and vertices1 ' \
+                         'must equals to the set of vertices of the digraph.'
+    else:
+        raise AssertionError('test_RG_init failed to raise an exception. '
+                             'A ValueError must be raised if the union of '
+                             'the sets vertices0 and vertices1 is not equals '
+                             'to the set of vertices of the digraph.')
+    try:
+        rg = ReachabilityGame(S0, set(), F, G)
+    except ValueError as e:
+        assert str(e) == 'The union of the sets vertices0 and vertices1 ' \
+                         'must equals to the set of vertices of the digraph.'
+    else:
+        raise AssertionError('test_RG_init failed to raise an exception. '
+                             'A ValueError must be raised if the union of '
+                             'the sets vertices0 and vertices1 is not equals '
+                             'to the set of vertices of the digraph.')
+    try:
+        rg = ReachabilityGame(set(), S1, F, G)
+    except ValueError as e:
+        assert str(e) == 'The union of the sets vertices0 and vertices1 ' \
+                         'must equals to the set of vertices of the digraph.'
+    else:
+        raise AssertionError('test_RG_init failed to raise an exception. '
+                             'A ValueError must be raised if the union of '
+                             'the sets vertices0 and vertices1 is not equals '
+                             'to the set of vertices of the digraph.')
+
+    try:
+        rg = ReachabilityGame(S0, S1, set(), G)
+    except ValueError as e:
+        assert str(e) == 'The set finals must be a subset of the set of ' \
+                         'vertices of the digraph.'
+    else:
+        raise AssertionError('test_RG_init failed to raise exception. '
+                             'A ValueError must be raise if the set finals is '
+                             'empty or if it is not a subset of the set of '
+                             'vertices of the digraph.')
+    try:
+        rg = ReachabilityGame(S0, S1, {graph.Vertex()}, G)
+    except ValueError as e:
+        assert str(e) == 'The set finals must be a subset of the set of ' \
+                         'vertices of the digraph.'
+    else:
+        raise AssertionError('test_RG_init failed to raise exception. '
+                             'A ValueError must be raise if the set finals is '
+                             'empty or if it is not a subset of the set of '
+                             'vertices of the digraph.')
+
+    rg = ReachabilityGame(S0, S1, F, G)
+    assert hasattr(rg, 'vertices0')
+    assert rg.vertices0 == S0
+    assert hasattr(rg, 'vertices1')
+    assert rg.vertices1 == S1
+    assert hasattr(rg, 'finals')
+    assert rg.finals == F
+
+def test_RG_compute_attrator():
+    S0, S1, A, F = reachability_game1
+    S0 = set(map(graph.Vertex, S0))
+    S1 = set(map(graph.Vertex, S1))
+    F = set(map(graph.Vertex, F))
+    G = graph.AdjacencyMapGraph()
+    for u, v in A:
+        G.insert_edge(graph.Vertex(u), graph.Vertex(v))
+    rg = ReachabilityGame(S0, S1, F, G)
+    assert rg._compute_attractor() == set(attractor1)
 
 
 def test_get_attractor():
