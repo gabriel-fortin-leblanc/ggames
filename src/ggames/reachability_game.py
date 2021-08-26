@@ -5,67 +5,91 @@ of elements of S_0 U S_1.
 """
 
 import logging
-from typing import Type, Any
+import typing
+from . import graph
 
 
 class ReachabilityGame:
 
-    __slots__ = ['vertices0', 'vertices1', 'digraph', 'finals', '_attractor']
+    __slots__ = ['vertices0', 'vertices1', 'finals', '_digraph', '_attractor']
 
-    def __init__(self, vertices0: list, vertices1: list,
-                 digraph: Any, finals: set) -> None:
+    def __init__(self, vertices0: typing.Set[graph.Vertex],
+                 vertices1: typing.Set[graph.Vertex],
+                 finals: typing.Set[graph.Vertex],
+                 digraph: typing.Any) -> typing.NoReturn:
+        """Constructor method
+        Builds a reachability game that takes place on the ``digraph``. The
+        ``digraph`` must be an instance of a supported format. See
+        `graph.AdjacencyMapGraph.create_instance` for more information about
+        the different supported formats.
+
+        :param vertices0: The set of vertices owned by the player 0.
+        :type vertices0: set of :class:`graph.Vertex`
+        :param vertices1: The set of vertices owned by the player 1.
+        :type vertices1: set of :class:`graph.Vertex`
+        :param finals: The set of vertices the player 0 wants to reach.
+        :type finals: set of :class:`graph.Vertex`
+        :param digraph: The directed graph the game takes place on.
+        :type digraph: any supported format
+        """
         self.vertices0 = vertices0
         self.vertices1 = vertices1
-        self.digraph = digraph
         self.finals = finals
-        self._attractor = None
+        self.digraph = digraph
 
     @property
-    def attractor(self):
-        # TODO: The documentation about this property should be placed here.
-        pass
+    def digraph(self): # pragma: no cover
+        return self._digraph
+
+    @digraph.setter
+    def digraph(self, digraph: any) -> typing.NoReturn:
+        self._digraph = graph.AdjacencyMapGraph.create_instance(digraph)
+
+    @digraph.getter
+    def digraph(self) -> graph.AdjacencyMapGraph:
+        return self._digraph
+
+    @property
+    def attractor(self): # pragma: no cover
+        return self._attractor
+
+    @attractor.setter
+    def attractor(self, attractor: typing.Set[graph.Vertex]) \
+            -> typing.NoReturn:
+        return self._attractor
 
     @attractor.getter
-    def attractor(self):
+    def attractor(self) -> typing.Set[graph.Vertex]:
         if self._attractor is None:
             self._attractor = self._compute_attractor()
         return self._attractor
 
-    def who_wins(self, n:int) -> bool:
-        starting_classes = dict()
-        for *c, r, s, t in self.__getattribute__('attractor'):
-            c = tuple(c)
-            if t == 0 and not s:
-                if c not in starting_classes:
-                    starting_classes[c] = set()
-                starting_classes[c].add(r)
-        for cls in starting_classes.values():
-            if len(cls) == n:
-                return True
-        return False
+    def next_winning_moves(self, v: graph.Vertex) -> typing.List[graph.Vertex]:
+        """
+        Returns a list of next winning moves for player 0 if ``v`` is in
+        ``vertices0`` or for player 1 otherwise. If there is no winning moves,
+        an empty list is returned.
 
-    def next_winning_moves(self, previous: Any, deg: Any) -> list:
+        :param v: The vertex the token is on.
+        :type v: :class:`graph.Vertex`
+        :returns: A list of next winning moves.
+        :rtype: list of :class:`graph.Vertex`
+        """
+        if v in self.vertices0:
+            return [u for u in self.digraph.neighbours(v, True) \
+                    if u in self.attractor]
+        else:
+            return [u for u in self.digraph.neighbours(v, True) \
+                    if u not in self.attractor]
+
+    def _compute_attractor(self) -> typing.Set[graph.Vertex]:
+        """
+        Computes and returns the attractor set of this game.
+
+        :returns: The attractor set.
+        :rtype: set of :class:`graph.Vertex`
+        """
         in_attractor = dict()
-        S0_set = set(self.vertices0)
-        propagate_stack = list(self.finals)
-
-        for v in self.vertices0 + self.vertices1:
-            in_attractor[v] = False
-
-        while len(propagate_stack) > 0:
-            vertex = propagate_stack.pop()
-            in_attractor[vertex] = True
-
-            for prev in previous[vertex]:
-                deg[prev] -= 1
-                if (prev in S0_set or deg[prev] == 0) \
-                        and not in_attractor[prev]:
-                    propagate_stack.append(prev)
-
-        return [vertex for vertex, is_in_attractor in in_attractor.items()
-                if is_in_attractor]
-
-    def _compute_attractor(self) -> set:
         previous = dict()
         num_out_degree = dict()
 
@@ -77,7 +101,19 @@ class ReachabilityGame:
             previous[v].add(u)
             num_out_degree[u] += 1
 
-        return set(self.next_winning_moves(previous, num_out_degree))
+        propagate_stack = list(F)
+        while len(propagate_stack) > 0:
+            vertex = propagate_stack.pop()
+            in_attractor[vertex] = True
+
+            for prev in previous[vertex]:
+                num_out_degree[prev] -= 1
+                if (prev in S0_set or num_out_degree[prev] == 0) \
+                        and not in_attractor[prev]:
+                    propagate_stack.append(prev)
+        
+        return [vertex for vertex, is_in_attractor in in_attractor.items()
+                    if is_in_attractor]
 
 
 def get_attractor(S0, S1, A, F):
