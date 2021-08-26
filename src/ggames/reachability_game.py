@@ -21,7 +21,14 @@ class ReachabilityGame:
         Builds a reachability game that takes place on the ``digraph``. The
         ``digraph`` must be an instance of a supported format. See
         `graph.AdjacencyMapGraph.create_instance` for more information about
-        the different supported formats.
+        the different supported formats. The union of ``vertices0`` and
+        ``vertices1`` must equals to the set of vertices of the digraph. Also,
+        the set ``finals`` must be a subset of the set of vertices of the
+        digraph.
+
+        :raises ValueError: An error is raised if the sets ``vertices0``,
+                            ``vertices1`` and ``finals`` don't statisfy the
+                            conditions above.
 
         :param vertices0: The set of vertices owned by the player 0.
         :type vertices0: set of :class:`graph.Vertex`
@@ -32,10 +39,18 @@ class ReachabilityGame:
         :param digraph: The directed graph the game takes place on.
         :type digraph: any supported format
         """
+        self.digraph = digraph
+        V = set(self.digraph.vertices)
+        if vertices0 + vertices1 != V:
+            raise ValueError('The union of the sets vertices0 and vertices1 '
+                             'must equals to the set of vertices of the '
+                             'digraph.')
+        if not finals.issubset(V):
+            raise ValueError('The set finals must be a subset of the set of '
+                             'vertices of the digraph.')
         self.vertices0 = vertices0
         self.vertices1 = vertices1
         self.finals = finals
-        self.digraph = digraph
 
     @property
     def digraph(self): # pragma: no cover
