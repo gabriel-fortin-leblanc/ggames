@@ -23,8 +23,8 @@ class ReachabilityGame:
         `graph.AdjacencyMapGraph.create_instance` for more information about
         the different supported formats. The union of ``vertices0`` and
         ``vertices1`` must equals to the set of vertices of the digraph. Also,
-        the set ``finals`` must be a subset of the set of vertices of the
-        digraph.
+        the set ``finals`` must be an non-empty subset of the set of vertices
+        of the digraph.
 
         :raises ValueError: An error is raised if the sets ``vertices0``,
                             ``vertices1`` and ``finals`` don't statisfy the
@@ -40,12 +40,12 @@ class ReachabilityGame:
         :type digraph: any supported format
         """
         self.digraph = digraph
-        V = set(self.digraph.vertices)
-        if vertices0 + vertices1 != V:
+        V = set(self.digraph.vertices())
+        if vertices0.union(vertices1) != V:
             raise ValueError('The union of the sets vertices0 and vertices1 '
                              'must equals to the set of vertices of the '
                              'digraph.')
-        if not finals.issubset(V):
+        if len(finals) == 0 or not finals.issubset(V):
             raise ValueError('The set finals must be a subset of the set of '
                              'vertices of the digraph.')
         self.vertices0 = vertices0
@@ -104,31 +104,30 @@ class ReachabilityGame:
         :returns: The attractor set.
         :rtype: set of :class:`graph.Vertex`
         """
-        in_attractor = dict()
+        attractor = set()
         previous = dict()
         num_out_degree = dict()
 
-        for v in self.vertices0 + self.vertices1:
+        for v in self.digraph.vertices():
             previous[v] = set()
             num_out_degree[v] = 0
 
-        for u, v in self.digraph:
-            previous[v].add(u)
-            num_out_degree[u] += 1
+        for e in self.digraph.edges():
+            previous[e.destination].add(e.origin)
+            num_out_degree[e.origin] += 1
 
-        propagate_stack = list(F)
+        propagate_stack = list(self.finals)
         while len(propagate_stack) > 0:
             vertex = propagate_stack.pop()
-            in_attractor[vertex] = True
+            attractor.add(vertex)
 
             for prev in previous[vertex]:
                 num_out_degree[prev] -= 1
-                if (prev in S0_set or num_out_degree[prev] == 0) \
-                        and not in_attractor[prev]:
+                if (prev in self.vertices0 or num_out_degree[prev] == 0) \
+                        and prev not in attractor:
                     propagate_stack.append(prev)
         
-        return [vertex for vertex, is_in_attractor in in_attractor.items()
-                    if is_in_attractor]
+        return attractor
 
 
 def get_attractor(S0, S1, A, F):

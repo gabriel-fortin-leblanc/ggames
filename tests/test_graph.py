@@ -132,6 +132,30 @@ def test_Edge_hash():
 
 
 # Tests of AdjacencyMapGraph
+def test_AMG_create_instance():
+	try:
+		G = AdjacencyMapGraph.create_instance(list())
+	except TypeError as e:
+		assert str(e) == 'The type <class \'list\'> is not supported as a ' \
+			'graph.'
+	else:
+		raise AssertionError('test_AMG_init failed to raise an exception'
+			'The format of the graph must be supported.')
+	G = AdjacencyMapGraph()
+	assert G == AdjacencyMapGraph.create_instance(G)
+	G.insert_vertex(Vertex(0))
+	assert G == AdjacencyMapGraph.create_instance(G)
+	G.insert_edge(Vertex(1), Vertex(0))
+	assert G == AdjacencyMapGraph.create_instance(G)
+
+def test_AMG_copy():
+	G = AdjacencyMapGraph()
+	assert G == AdjacencyMapGraph.copy(G)
+	G.insert_vertex(Vertex(0))
+	assert G == AdjacencyMapGraph.copy(G)
+	G.insert_edge(Vertex(1), Vertex(0))
+	assert G == AdjacencyMapGraph.copy(G)
+
 def test_AMG_init():
 	G = AdjacencyMapGraph()
 	assert hasattr(G, '_adjacency_map')
@@ -178,6 +202,21 @@ def test_AMG_insert_edge():
 	e = Edge(u, v, 0)
 	assert e == G._adjacency_map[u][v]
 	assert e == G._adjacency_map[v][u]
+
+def test_AMG_neighbours():
+	G = AdjacencyMapGraph()
+	u = Vertex(0)
+	v = Vertex(1)
+	w = Vertex(2)
+	y = Vertex(3)
+	G.insert_edge(u, v)
+	G.insert_edge(v, w)
+	G.insert_edge(w, u)
+	G.insert_edge(w, y)
+	assert set(G.neighbours(u)) == {v, w}
+	assert set(G.neighbours(u, True)) == {v}
+	assert set(G.neighbours(w)) == {v, u, y}
+	assert G.neighbours(Vertex()) is None
 
 def test_AMG_remove_edge():
 	G = AdjacencyMapGraph()
@@ -330,3 +369,27 @@ def test_AMG_edges():
 	assert len(edges) == 2
 	assert Edge(u, v) in edges
 	assert Edge(w, y) in edges
+
+def test_AMG_eq_ne():
+	G = AdjacencyMapGraph()
+	H = AdjacencyMapGraph()
+	u = Vertex(0)
+	v = Vertex(1)
+	w = Vertex(2)
+	y = Vertex(3)
+	assert G == H
+	H.insert_vertex(u)
+	assert G != H
+	G.insert_vertex(v)
+	assert G != H
+	G.insert_vertex(u)
+	H.insert_vertex(v)
+	assert G == H
+	G.insert_edge(w, y)
+	H.insert_edge(y, w)
+	assert G != H
+	G.remove_edge(Edge(w, y))
+	G.insert_edge(y, w)
+	assert G == H
+
+

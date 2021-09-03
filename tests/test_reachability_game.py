@@ -104,7 +104,7 @@ def test_RG_compute_attrator():
     for u, v in A:
         G.insert_edge(graph.Vertex(u), graph.Vertex(v))
     rg = ReachabilityGame(S0, S1, F, G)
-    assert rg._compute_attractor() == set(attractor1)
+    assert rg._compute_attractor() == {graph.Vertex(v) for v in attractor1}
 
 
 def test_get_attractor():
