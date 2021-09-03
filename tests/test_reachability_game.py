@@ -95,6 +95,20 @@ def test_RG_init():
     assert hasattr(rg, 'finals')
     assert rg.finals == F
 
+def test_RG_getters_setters():
+    G = graph.AdjacencyMapGraph()
+    S0, S1, A, F = reachability_game1
+    for u, v in A:
+        G.insert_edge(graph.Vertex(u), graph.Vertex(v))
+    S0 = {graph.Vertex(u) for u in S0}
+    S1 = {graph.Vertex(u) for u in S1}
+    F = {graph.Vertex(u) for u in F}
+    rg = ReachabilityGame(S0, S1, F, G)
+    assert rg.digraph == G
+    assert rg.attractor == {graph.Vertex(v) for v in attractor1}
+    rg.attractor = set()
+    assert rg.attractor == set()
+
 def test_RG_compute_attrator():
     S0, S1, A, F = reachability_game1
     S0 = set(map(graph.Vertex, S0))
@@ -106,7 +120,6 @@ def test_RG_compute_attrator():
     rg = ReachabilityGame(S0, S1, F, G)
     assert rg._compute_attractor() == {graph.Vertex(v) for v in attractor1}
 
-
 def test_get_attractor():
     attractor = get_attractor(*reachability_game1)
     assert set(attractor) == set(attractor1)
@@ -116,7 +129,6 @@ def test_get_attractor():
 
     attractor = get_attractor(*reachability_game3)
     assert set(attractor) == set(attractor3)
-
 
 def test_get_next_winning_moves():
     next_moves_for_p0 = get_next_winning_moves(2, reachability_game1[2],

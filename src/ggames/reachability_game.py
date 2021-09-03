@@ -51,6 +51,7 @@ class ReachabilityGame:
         self.vertices0 = vertices0
         self.vertices1 = vertices1
         self.finals = finals
+        self._attractor = None
 
     @property
     def digraph(self): # pragma: no cover
@@ -71,7 +72,7 @@ class ReachabilityGame:
     @attractor.setter
     def attractor(self, attractor: typing.Set[graph.Vertex]) \
             -> typing.NoReturn:
-        return self._attractor
+        self._attractor = attractor
 
     @attractor.getter
     def attractor(self) -> typing.Set[graph.Vertex]:
